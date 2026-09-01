@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="src/Auction.Functions/Auction.Functions.csproj" />
+  <Project Path="src/Auction.Infrastructure/Auction.Infrastructure.csproj" />
+  <Project Path="src/Auction.WebApi/Auction.WebApi.csproj" />
+  <Project Path="src/Auction.Application/Auction.Application.csproj" />
+  <Project Path="src/Auction.Contracts/Auction.Contracts.csproj" />
+  <Project Path="src/Auction.Domain/Auction.Domain.csproj" />
+</Solution>
