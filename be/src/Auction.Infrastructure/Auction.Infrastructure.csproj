@@ -6,4 +6,10 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Auction.Domain\Auction.Domain.csproj" />
+      <ProjectReference Include="..\Auction.Application\Auction.Application.csproj" />
+      <ProjectReference Include="..\Auction.Contracts\Auction.Contracts.csproj" />
+    </ItemGroup>
+
 </Project>
