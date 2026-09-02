@@ -1,3 +1,5 @@
+using Auction.WebApi.Endpoints;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
@@ -10,5 +12,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.MapHealthEndpoints();
 
 app.Run();

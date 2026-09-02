@@ -1,0 +1,72 @@
+name: Build and Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'be/**'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  REGISTRY_NAME: ${{ vars.REGISTRY_NAME }}
+  RESOURCE_GROUP: ${{ vars.RESOURCE_GROUP }}
+
+jobs:
+  build_and_deploy_webapi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push WebApi image
+        run: |
+          az acr build \
+            --registry ${{ env.REGISTRY_NAME }} \
+            --image auction-webapi:${{ github.sha }} \
+            --file be/src/Auction.WebApi/Dockerfile \
+            be
+
+      - name: Update Container App with new image
+        run: |
+          az containerapp update \
+            --name ${{ vars.API_CONTAINER_APP_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --image ${{ env.REGISTRY_NAME }}.azurecr.io/auction-webapi:${{ github.sha }}
+
+  build_and_deploy_functions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push Functions image
+        run: |
+          az acr build \
+            --registry ${{ env.REGISTRY_NAME }} \
+            --image auction-functions:${{ github.sha }} \
+            --file be/src/Auction.Functions/Dockerfile \
+            be
+
+      - name: Update Function App with new image
+        run: |
+          az functionapp config container set \
+            --name ${{ vars.FUNCTION_APP_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --image ${{ env.REGISTRY_NAME }}.azurecr.io/auction-functions:${{ github.sha }}
