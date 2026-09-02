@@ -18,6 +18,19 @@ param functionAppName string = 'auction-function'
 @description('Name of the storage account backing the function app (AzureWebJobsStorage).')
 param functionStorageAccountName string
 
+@description('Name of the static web app.')
+param staticWebAppName string = 'auction-swa'
+
+@description('URL of the repository to deploy from.')
+param repositoryUrl string = 'https://github.com/vpriadilia/auction'
+
+@description('Branch of the repository to deploy from. Defaults to \'main\'.')
+param branch string = 'main'
+
+@description('GitHub personal access token (repo + workflow scopes) used to set up the CI/CD integration.')
+@secure()
+param repositoryToken string
+
 param imageNameAPI string = 'auction-webapi'
 param imageNameFunction string = 'auction-functions'
 
@@ -77,6 +90,17 @@ module functionApp 'modules/containerApp.bicep' = {
         value: 'managedidentity'
       }
     ]
+  }
+}
+
+module staticSites 'modules/staticWebApp.bicep' = {
+  name: 'staticSites'
+  params: {
+    name: staticWebAppName
+    location: location
+    repositoryUrl: repositoryUrl
+    branch: branch
+    repositoryToken: repositoryToken
   }
 }
 
