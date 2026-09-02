@@ -50,6 +50,17 @@ module containerEnvironment 'modules/containerEnvironment.bicep' = {
   }
 }
 
+module staticSites 'modules/staticWebApp.bicep' = {
+  name: 'staticSites'
+  params: {
+    name: staticWebAppName
+    location: location
+    repositoryUrl: repositoryUrl
+    branch: branch
+    repositoryToken: repositoryToken
+  }
+}
+
 module containerApp 'modules/containerApp.bicep' = {
   name: 'containerApp'
   params: {
@@ -59,6 +70,12 @@ module containerApp 'modules/containerApp.bicep' = {
     environmentId: containerEnvironment.outputs.id
     containerImage: '${containerRegistry.outputs.loginServer}/${imageNameAPI}:latest'
     targetPort: 8080
+    environmentVariables: [
+      {
+        name: 'Cors__AllowedOrigins__0'
+        value: 'https://${staticSites.outputs.defaultHostname}'
+      }
+    ]
   }
 }
 
@@ -90,17 +107,6 @@ module functionApp 'modules/containerApp.bicep' = {
         value: 'managedidentity'
       }
     ]
-  }
-}
-
-module staticSites 'modules/staticWebApp.bicep' = {
-  name: 'staticSites'
-  params: {
-    name: staticWebAppName
-    location: location
-    repositoryUrl: repositoryUrl
-    branch: branch
-    repositoryToken: repositoryToken
   }
 }
 
