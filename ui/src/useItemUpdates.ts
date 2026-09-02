@@ -9,7 +9,7 @@ export function useItemUpdates() {
 
   useEffect(() => {
     const connection = new HubConnectionBuilder()
-      .withUrl(`${functionsBaseUrl}/api`)
+      .withUrl(`${functionsBaseUrl}/api`, { withCredentials: false })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
       .build()
