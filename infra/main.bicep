@@ -40,6 +40,9 @@ param logAnalyticsWorkspaceName string = 'auction-logs'
 @description('Name of the Application Insights component.')
 param appInsightsName string = 'auction-insights'
 
+@description('Name of the Service Bus namespace.')
+param serviceBusNamespaceName string = 'auction-bus'
+
 module containerRegistry 'modules/containerRegistry.bicep' = {
   name: 'containerRegistry'
   params: {
@@ -63,6 +66,14 @@ module containerEnvironment 'modules/containerEnvironment.bicep' = {
     name: containerEnvironmentName
     location: location
     logAnalyticsWorkspaceName: appMonitor.outputs.logAnalyticsWorkspaceName
+  }
+}
+
+module serviceBus 'modules/serviceBus.bicep' = {
+  name: 'serviceBus'
+  params: {
+    name: serviceBusNamespaceName
+    location: location
   }
 }
 
@@ -94,6 +105,10 @@ module containerApp 'modules/containerApp.bicep' = {
       {
         name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
         value: appMonitor.outputs.appInsightsConnectionString
+      }
+      {
+        name: 'ServiceBus__FullyQualifiedNamespace'
+        value: serviceBus.outputs.fullyQualifiedNamespace
       }
     ]
   }
@@ -141,5 +156,7 @@ module roleAssignments 'modules/roleAssignments.bicep' = {
     principalId: containerEnvironment.outputs.principalId
     storageAccountName: functionStorageAccount.outputs.name
     storagePrincipalId: functionApp.outputs.principalId
+    serviceBusNamespaceName: serviceBus.outputs.name
+    serviceBusSenderPrincipalId: containerApp.outputs.principalId
   }
 }

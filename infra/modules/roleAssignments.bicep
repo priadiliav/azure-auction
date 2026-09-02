@@ -10,6 +10,12 @@ param storageAccountName string
 @description('Principal (object) ID of the identity that should access the storage account.')
 param storagePrincipalId string
 
+@description('Name of an existing Service Bus namespace to grant send access on.')
+param serviceBusNamespaceName string
+
+@description('Principal (object) ID of the identity that should send messages to the Service Bus namespace.')
+param serviceBusSenderPrincipalId string
+
 resource containerRegistry 'Microsoft.ContainerRegistry/registries@2026-01-01-preview' existing = {
   name: containerRegistryName
 }
@@ -46,3 +52,17 @@ resource storageRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04
     principalType: 'ServicePrincipal'
   }
 }]
+
+resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' existing = {
+  name: serviceBusNamespaceName
+}
+
+resource serviceBusSenderRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(serviceBusNamespace.id, serviceBusSenderPrincipalId, 'AzureServiceBusDataSender')
+  scope: serviceBusNamespace
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39')
+    principalId: serviceBusSenderPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
