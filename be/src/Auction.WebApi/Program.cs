@@ -1,8 +1,16 @@
 using Auction.WebApi.Endpoints;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+
+if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING")))
+{
+    builder.Services
+        .AddOpenTelemetry()
+        .UseAzureMonitor();
+}
 
 builder.Services.AddCors(options =>
 {

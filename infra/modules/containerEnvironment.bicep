@@ -4,6 +4,13 @@ param name string
 @description('Azure region for the environment.')
 param location string
 
+@description('Name of an existing Log Analytics workspace to send platform logs to.')
+param logAnalyticsWorkspaceName string
+
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
+  name: logAnalyticsWorkspaceName
+}
+
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2026-01-01' = {
   name: name
   location: location
@@ -11,6 +18,13 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2026-01-01'
     type: 'SystemAssigned'
   }
   properties: {
+    appLogsConfiguration: {
+      destination: 'log-analytics'
+      logAnalyticsConfiguration: {
+        customerId: logAnalyticsWorkspace.properties.customerId
+        sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
+      }
+    }
     zoneRedundant: false
     kedaConfiguration: {}
     daprConfiguration: {}

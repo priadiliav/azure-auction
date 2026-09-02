@@ -34,10 +34,25 @@ param repositoryToken string
 param imageNameAPI string = 'auction-webapi'
 param imageNameFunction string = 'auction-functions'
 
+@description('Name of the Log Analytics workspace backing platform logs and Application Insights.')
+param logAnalyticsWorkspaceName string = 'auction-logs'
+
+@description('Name of the Application Insights component.')
+param appInsightsName string = 'auction-insights'
+
 module containerRegistry 'modules/containerRegistry.bicep' = {
   name: 'containerRegistry'
   params: {
     name: containerRegistryName
+    location: location
+  }
+}
+
+module appMonitor 'modules/appMonitor.bicep' = {
+  name: 'appMonitor'
+  params: {
+    logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
+    appInsightsName: appInsightsName
     location: location
   }
 }
@@ -47,6 +62,7 @@ module containerEnvironment 'modules/containerEnvironment.bicep' = {
   params: {
     name: containerEnvironmentName
     location: location
+    logAnalyticsWorkspaceName: appMonitor.outputs.logAnalyticsWorkspaceName
   }
 }
 
@@ -74,6 +90,10 @@ module containerApp 'modules/containerApp.bicep' = {
       {
         name: 'Cors__AllowedOrigins__0'
         value: 'https://${staticSites.outputs.defaultHostname}'
+      }
+      {
+        name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+        value: appMonitor.outputs.appInsightsConnectionString
       }
     ]
   }
@@ -105,6 +125,10 @@ module functionApp 'modules/containerApp.bicep' = {
       {
         name: 'AzureWebJobsStorage__credential'
         value: 'managedidentity'
+      }
+      {
+        name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+        value: appMonitor.outputs.appInsightsConnectionString
       }
     ]
   }
