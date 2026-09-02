@@ -5,11 +5,13 @@ import { fetchItems } from './api'
 import { Layout } from './components/Layout'
 import { ItemGrid } from './components/ItemGrid'
 import { CreateItemDialog } from './components/CreateItemDialog'
+import { useItemUpdates } from './useItemUpdates'
 
 function App() {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
 
   const itemsQuery = useQuery({ queryKey: ['items'], queryFn: fetchItems })
+  useItemUpdates()
 
   return (
     <Layout onSellClick={() => setIsCreateOpen(true)}>

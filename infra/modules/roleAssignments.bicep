@@ -19,6 +19,12 @@ param serviceBusSenderPrincipalId string
 @description('Principal (object) ID of the identity that should both send and receive messages on the Service Bus namespace (e.g. the Function App, consuming "items" and publishing "states").')
 param serviceBusProcessorPrincipalId string
 
+@description('Name of an existing Azure SignalR Service resource to grant access on.')
+param signalRName string
+
+@description('Principal (object) ID of the identity that should send messages via the SignalR Service (e.g. the Function App notifier).')
+param signalRPrincipalId string
+
 resource containerRegistry 'Microsoft.ContainerRegistry/registries@2026-01-01-preview' existing = {
   name: containerRegistryName
 }
@@ -84,3 +90,17 @@ resource serviceBusProcessorRoleAssignments 'Microsoft.Authorization/roleAssignm
     principalType: 'ServicePrincipal'
   }
 }]
+
+resource signalR 'Microsoft.SignalRService/signalR@2023-02-01' existing = {
+  name: signalRName
+}
+
+resource signalRRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(signalR.id, signalRPrincipalId, 'SignalRServiceOwner')
+  scope: signalR
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7e4f1700-ea5a-4f59-8f37-079cfe29dce3')
+    principalId: signalRPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}

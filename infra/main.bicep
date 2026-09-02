@@ -55,6 +55,9 @@ param sqlAadAdminObjectId string
 @description('Display name of the Entra ID admin (shown in the portal only).')
 param sqlAadAdminLogin string
 
+@description('Name of the Azure SignalR Service resource.')
+param signalRName string = 'auction-signalr'
+
 module containerRegistry 'modules/containerRegistry.bicep' = {
   name: 'containerRegistry'
   params: {
@@ -97,6 +100,14 @@ module sqlDatabase 'modules/sqlDatabase.bicep' = {
     location: location
     aadAdminObjectId: sqlAadAdminObjectId
     aadAdminLogin: sqlAadAdminLogin
+  }
+}
+
+module signalR 'modules/signalR.bicep' = {
+  name: 'signalR'
+  params: {
+    name: signalRName
+    location: location
   }
 }
 
@@ -159,6 +170,9 @@ module functionApp 'modules/containerApp.bicep' = {
     environmentId: containerEnvironment.outputs.id
     containerImage: '${containerRegistry.outputs.loginServer}/${imageNameFunction}:latest'
     targetPort: 80
+    corsAllowedOrigins: [
+      'https://${staticSites.outputs.defaultHostname}'
+    ]
     environmentVariables: [
       {
         name: 'AzureWebJobsStorage__accountName'
@@ -184,6 +198,14 @@ module functionApp 'modules/containerApp.bicep' = {
         name: 'ConnectionStrings__AuctionDb'
         value: 'Server=tcp:${sqlDatabase.outputs.serverFqdn},1433;Database=${sqlDatabase.outputs.databaseName};Authentication=Active Directory Default;Encrypt=True;TrustServerCertificate=False;'
       }
+      {
+        name: 'AzureSignalRConnection__serviceUri'
+        value: 'https://${signalR.outputs.hostName}'
+      }
+      {
+        name: 'AzureSignalRConnection__credential'
+        value: 'managedidentity'
+      }
     ]
   }
 }
@@ -198,5 +220,7 @@ module roleAssignments 'modules/roleAssignments.bicep' = {
     serviceBusNamespaceName: serviceBus.outputs.name
     serviceBusSenderPrincipalId: containerApp.outputs.principalId
     serviceBusProcessorPrincipalId: functionApp.outputs.principalId
+    signalRName: signalR.outputs.name
+    signalRPrincipalId: functionApp.outputs.principalId
   }
 }

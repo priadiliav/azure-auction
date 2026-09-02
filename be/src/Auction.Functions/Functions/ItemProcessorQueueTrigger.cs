@@ -18,7 +18,6 @@ public class ItemProcessorQueueTrigger(
         CancellationToken cancellationToken)
     {
         logger.LogInformation("Processing item {ItemId}", message.ItemId);
-
         var item = await itemRepository.GetByIdAsync(message.ItemId, cancellationToken);
         if (item is null)
         {
@@ -26,6 +25,8 @@ public class ItemProcessorQueueTrigger(
             return;
         }
 
+        // todo: separated to each function
+        
         item.MarkInProcess();
         await itemRepository.UpdateAsync(item, cancellationToken);
         await statePublisher.PublishAsync(new ItemStateChangedMessage(item.Id, item.Status.ToString()), cancellationToken);

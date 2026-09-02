@@ -34,6 +34,9 @@ param maxReplicas int = 1
 @description('Container App kind. Use \'functionapp\' to run this as Azure Functions on Container Apps instead of a plain container app.')
 param kind string = 'containerapps'
 
+@description('Allowed CORS origins for the ingress. Empty array disables the CORS policy (e.g. when the app handles CORS itself, like ASP.NET Core\'s UseCors).')
+param corsAllowedOrigins array = []
+
 resource containerApp 'Microsoft.App/containerapps@2026-01-01' = {
   name: name
   location: location
@@ -65,6 +68,15 @@ resource containerApp 'Microsoft.App/containerapps@2026-01-01' = {
           affinity: 'none'
         }
         additionalPortMappings: []
+        corsPolicy: empty(corsAllowedOrigins) ? null : {
+          allowedOrigins: corsAllowedOrigins
+          allowedMethods: [
+            '*'
+          ]
+          allowedHeaders: [
+            '*'
+          ]
+        }
       }
       registries: [
         {
