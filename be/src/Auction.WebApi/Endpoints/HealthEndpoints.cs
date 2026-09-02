@@ -16,7 +16,6 @@ public static class HealthEndpoints
             {
                 status = "healthy",
                 version,
-                environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "unknown",
             });
         });
     }

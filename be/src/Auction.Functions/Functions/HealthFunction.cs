@@ -20,11 +20,11 @@ public class HealthFunction(ILogger<HealthFunction> logger)
         var version = Assembly.GetExecutingAssembly()
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
             ?? "unknown";
+        
         var response = new
         {
             status = "healthy",
             version,
-            environment = Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") ?? "unknown",
         };
 
         return new OkObjectResult(response);
