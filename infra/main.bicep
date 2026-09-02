@@ -18,8 +18,8 @@ param functionAppName string = 'auction-function'
 @description('Name of the storage account backing the function app (AzureWebJobsStorage).')
 param functionStorageAccountName string
 
-param imageNameAPI string = 'auction-api'
-param imageNameFunction string = 'auction-function'
+param imageNameAPI string = 'auction-webapi'
+param imageNameFunction string = 'auction-functions'
 
 module containerRegistry 'modules/containerRegistry.bicep' = {
   name: 'containerRegistry'

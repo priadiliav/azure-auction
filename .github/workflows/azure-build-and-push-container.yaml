@@ -35,6 +35,7 @@ jobs:
             --registry ${{ env.REGISTRY_NAME }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
             --image auction-webapi:${{ github.sha }} \
+            --image auction-webapi:latest \
             --file be/src/Auction.WebApi/Dockerfile \
             be
 
@@ -62,7 +63,8 @@ jobs:
           az acr build \
             --registry ${{ env.REGISTRY_NAME }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
-            --image auction-function:${{ github.sha }} \
+            --image auction-functions:${{ github.sha }} \
+            --image auction-functions:latest \
             --file be/src/Auction.Functions/Dockerfile \
             be
 
@@ -71,4 +73,4 @@ jobs:
           az containerapp update \
             --name ${{ vars.FUNCTION_APP_NAME }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
-            --image ${{ env.REGISTRY_NAME }}.azurecr.io/auction-function:${{ github.sha }}
+            --image ${{ env.REGISTRY_NAME }}.azurecr.io/auction-functions:${{ github.sha }}
