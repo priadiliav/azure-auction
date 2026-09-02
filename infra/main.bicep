@@ -66,7 +66,7 @@ module functionApp 'modules/containerApp.bicep' = {
     registryServer: containerRegistry.outputs.loginServer
     environmentId: containerEnvironment.outputs.id
     containerImage: '${containerRegistry.outputs.loginServer}/${imageNameFunction}:latest'
-    targetPort: 8080
+    targetPort: 80
     environmentVariables: [
       {
         name: 'AzureWebJobsStorage__accountName'
