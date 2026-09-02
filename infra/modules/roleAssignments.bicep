@@ -10,11 +10,14 @@ param storageAccountName string
 @description('Principal (object) ID of the identity that should access the storage account.')
 param storagePrincipalId string
 
-@description('Name of an existing Service Bus namespace to grant send access on.')
+@description('Name of an existing Service Bus namespace to grant access on.')
 param serviceBusNamespaceName string
 
-@description('Principal (object) ID of the identity that should send messages to the Service Bus namespace.')
+@description('Principal (object) ID of the identity that should send messages to the Service Bus namespace (e.g. the API, publishing "items").')
 param serviceBusSenderPrincipalId string
+
+@description('Principal (object) ID of the identity that should both send and receive messages on the Service Bus namespace (e.g. the Function App, consuming "items" and publishing "states").')
+param serviceBusProcessorPrincipalId string
 
 resource containerRegistry 'Microsoft.ContainerRegistry/registries@2026-01-01-preview' existing = {
   name: containerRegistryName
@@ -66,3 +69,18 @@ resource serviceBusSenderRoleAssignment 'Microsoft.Authorization/roleAssignments
     principalType: 'ServicePrincipal'
   }
 }
+
+var serviceBusProcessorRoleDefinitionIds = [
+  '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39' // Azure Service Bus Data Sender
+  '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0' // Azure Service Bus Data Receiver
+]
+
+resource serviceBusProcessorRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for roleDefinitionId in serviceBusProcessorRoleDefinitionIds: {
+  name: guid(serviceBusNamespace.id, serviceBusProcessorPrincipalId, roleDefinitionId)
+  scope: serviceBusNamespace
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleDefinitionId)
+    principalId: serviceBusProcessorPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}]

@@ -18,5 +18,10 @@ resource itemsQueue 'Microsoft.ServiceBus/namespaces/queues@2022-10-01-preview' 
   name: 'items'
 }
 
+resource statesQueue 'Microsoft.ServiceBus/namespaces/queues@2022-10-01-preview' = {
+  parent: serviceBusNamespace
+  name: 'states'
+}
+
 output name string = serviceBusNamespace.name
 output fullyQualifiedNamespace string = '${serviceBusNamespace.name}.servicebus.windows.net'

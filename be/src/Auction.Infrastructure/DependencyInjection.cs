@@ -19,6 +19,7 @@ public static class DependencyInjection
 
         services.AddSingleton(new ServiceBusClient(serviceBusNamespace, new DefaultAzureCredential()));
         services.AddSingleton<IItemPublisher, ServiceBusItemPublisher>();
+        services.AddSingleton<IStatePublisher, ServiceBusStatePublisher>();
 
         var connectionString = configuration.GetConnectionString("AuctionDb")
             ?? throw new InvalidOperationException("Missing configuration: ConnectionStrings:AuctionDb");

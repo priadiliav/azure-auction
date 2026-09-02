@@ -20,6 +20,7 @@ public class Item
     }
 
     public void MarkInProcess() => Status = ItemStatus.InProcess;
+    public void MarkAnalysis() => Status = ItemStatus.Analysis;
     public void MarkListed() => Status = ItemStatus.Listed;
     public void MarkFailed() => Status = ItemStatus.Failed;
 }

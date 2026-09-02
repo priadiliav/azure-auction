@@ -18,4 +18,9 @@ public interface IItemRepository
     /// Retrieves all items.
     /// </summary>
     Task<IReadOnlyList<Item>> GetAllAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Persists changes made to an existing item.
+    /// </summary>
+    Task UpdateAsync(Item item, CancellationToken cancellationToken);
 }

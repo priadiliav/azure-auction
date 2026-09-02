@@ -172,6 +172,18 @@ module functionApp 'modules/containerApp.bicep' = {
         name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
         value: appMonitor.outputs.appInsightsConnectionString
       }
+      {
+        name: 'ServiceBus__FullyQualifiedNamespace'
+        value: serviceBus.outputs.fullyQualifiedNamespace
+      }
+      {
+        name: 'ServiceBusConnection__fullyQualifiedNamespace'
+        value: serviceBus.outputs.fullyQualifiedNamespace
+      }
+      {
+        name: 'ConnectionStrings__AuctionDb'
+        value: 'Server=tcp:${sqlDatabase.outputs.serverFqdn},1433;Database=${sqlDatabase.outputs.databaseName};Authentication=Active Directory Default;Encrypt=True;TrustServerCertificate=False;'
+      }
     ]
   }
 }
@@ -185,5 +197,6 @@ module roleAssignments 'modules/roleAssignments.bicep' = {
     storagePrincipalId: functionApp.outputs.principalId
     serviceBusNamespaceName: serviceBus.outputs.name
     serviceBusSenderPrincipalId: containerApp.outputs.principalId
+    serviceBusProcessorPrincipalId: functionApp.outputs.principalId
   }
 }

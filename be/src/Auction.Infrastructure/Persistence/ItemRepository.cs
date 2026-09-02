@@ -17,4 +17,10 @@ public class ItemRepository(AuctionDbContext dbContext) : IItemRepository
 
     public async Task<IReadOnlyList<Item>> GetAllAsync(CancellationToken cancellationToken)
         => await dbContext.Items.OrderByDescending(item => item.Id).ToListAsync(cancellationToken);
+
+    public async Task UpdateAsync(Item item, CancellationToken cancellationToken)
+    {
+        dbContext.Items.Update(item);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
 }
