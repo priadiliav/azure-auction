@@ -14,4 +14,7 @@ public class ItemRepository(AuctionDbContext dbContext) : IItemRepository
 
     public Task<Item?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         => dbContext.Items.SingleOrDefaultAsync(item => item.Id == id, cancellationToken);
+
+    public async Task<IReadOnlyList<Item>> GetAllAsync(CancellationToken cancellationToken)
+        => await dbContext.Items.OrderByDescending(item => item.Id).ToListAsync(cancellationToken);
 }

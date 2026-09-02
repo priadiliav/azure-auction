@@ -1,113 +1,127 @@
-import { useEffect, useState } from 'react'
-
-type HealthResponse = {
-  status: string
-  version: string
-  environment: string
-}
-
-type ItemResponse = {
-  itemId: string
-  title: string
-  startingPrice: number
-  status: string
-}
-
-const baseUrl = import.meta.env.VITE_API_BASE_URL
+import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Container,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+  Paper,
+} from '@mui/material'
+import { createItem, fetchHealth, fetchItems } from './api'
 
 function App() {
-  const [health, setHealth] = useState<HealthResponse | null>(null)
-  const [healthError, setHealthError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
   const [title, setTitle] = useState('')
   const [startingPrice, setStartingPrice] = useState('')
-  const [creating, setCreating] = useState(false)
-  const [createdItem, setCreatedItem] = useState<ItemResponse | null>(null)
-  const [createError, setCreateError] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetch(`${baseUrl}/api/health`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`Request failed: ${res.status}`)
-        return res.json() as Promise<HealthResponse>
-      })
-      .then(setHealth)
-      .catch((err: Error) => setHealthError(err.message))
-  }, [])
+  const healthQuery = useQuery({ queryKey: ['health'], queryFn: fetchHealth })
+  const itemsQuery = useQuery({ queryKey: ['items'], queryFn: fetchItems })
 
-  const createItem = async () => {
-    setCreating(true)
-    setCreateError(null)
-    setCreatedItem(null)
-    try {
-      const createRes = await fetch(`${baseUrl}/api/items`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, startingPrice: Number(startingPrice) }),
-      })
-      if (!createRes.ok) throw new Error(`Request failed: ${createRes.status}`)
-      const { itemId } = (await createRes.json()) as { itemId: string }
-
-      const itemRes = await fetch(`${baseUrl}/api/items/${itemId}`)
-      if (!itemRes.ok) throw new Error(`Request failed: ${itemRes.status}`)
-      setCreatedItem((await itemRes.json()) as ItemResponse)
-    } catch (err) {
-      setCreateError((err as Error).message)
-    } finally {
-      setCreating(false)
-    }
-  }
+  const createItemMutation = useMutation({
+    mutationFn: createItem,
+    onSuccess: () => {
+      setTitle('')
+      setStartingPrice('')
+      queryClient.invalidateQueries({ queryKey: ['items'] })
+    },
+  })
 
   return (
-    <>
-      <p>
-        {healthError
-          ? `Health check failed: ${healthError}`
-          : health
-            ? `API status: ${health.status} (v${health.version}, ${health.environment})`
-            : 'Loading...'}
-      </p>
+    <Container maxWidth="sm" sx={{ py: 4 }}>
+      <Typography variant="body2" color="text.secondary" gutterBottom>
+        {healthQuery.isPending && 'Checking API status...'}
+        {healthQuery.isError && `Health check failed: ${healthQuery.error.message}`}
+        {healthQuery.data &&
+          `API status: ${healthQuery.data.status} (v${healthQuery.data.version}, ${healthQuery.data.environment})`}
+      </Typography>
 
-      <h2>Create item</h2>
-      <input
-        placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      <input
-        placeholder="Starting price"
-        type="number"
-        value={startingPrice}
-        onChange={(e) => setStartingPrice(e.target.value)}
-      />
-      <button disabled={creating || !title || !startingPrice} onClick={createItem}>
-        {creating ? 'Creating...' : 'Create item'}
-      </button>
+      <Typography variant="h5" gutterBottom>
+        Create item
+      </Typography>
+      <Stack direction="row" spacing={2} sx={{ mb: 4 }}>
+        <TextField
+          label="Title"
+          size="small"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <TextField
+          label="Starting price"
+          type="number"
+          size="small"
+          value={startingPrice}
+          onChange={(e) => setStartingPrice(e.target.value)}
+        />
+        <Button
+          variant="contained"
+          disabled={!title || !startingPrice || createItemMutation.isPending}
+          onClick={() => createItemMutation.mutate({ title, startingPrice: Number(startingPrice) })}
+        >
+          {createItemMutation.isPending ? 'Creating...' : 'Create item'}
+        </Button>
+      </Stack>
 
-      {createdItem && (
-        <table>
-          <tbody>
-            <tr>
-              <td>Item ID</td>
-              <td>{createdItem.itemId}</td>
-            </tr>
-            <tr>
-              <td>Title</td>
-              <td>{createdItem.title}</td>
-            </tr>
-            <tr>
-              <td>Starting price</td>
-              <td>{createdItem.startingPrice}</td>
-            </tr>
-            <tr>
-              <td>Status</td>
-              <td>{createdItem.status}</td>
-            </tr>
-          </tbody>
-        </table>
+      {createItemMutation.isError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Failed to create item: {createItemMutation.error.message}
+        </Alert>
       )}
-      {createError && <p>Failed to create item: {createError}</p>}
-    </>
+
+      <Typography variant="h5" gutterBottom>
+        Items
+      </Typography>
+
+      {itemsQuery.isPending && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <CircularProgress />
+        </Box>
+      )}
+      {itemsQuery.isError && <Alert severity="error">Failed to load items: {itemsQuery.error.message}</Alert>}
+
+      {itemsQuery.data && (
+        <TableContainer component={Paper}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Title</TableCell>
+                <TableCell align="right">Starting price</TableCell>
+                <TableCell align="right">Status</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {itemsQuery.data.map((item) => (
+                <TableRow key={item.itemId}>
+                  <TableCell>{item.title}</TableCell>
+                  <TableCell align="right">{item.startingPrice}</TableCell>
+                  <TableCell align="right">
+                    <Chip label={item.status} size="small" />
+                  </TableCell>
+                </TableRow>
+              ))}
+              {itemsQuery.data.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={3} align="center">
+                    No items yet
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+    </Container>
   )
 }
 

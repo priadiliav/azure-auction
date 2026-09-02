@@ -13,4 +13,9 @@ public interface IItemRepository
     /// Retrieves an item by its unique identifier.
     /// </summary>
     Task<Item?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Retrieves all items.
+    /// </summary>
+    Task<IReadOnlyList<Item>> GetAllAsync(CancellationToken cancellationToken);
 }
