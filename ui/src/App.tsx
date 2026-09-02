@@ -6,6 +6,13 @@ type HealthResponse = {
   environment: string
 }
 
+type ItemResponse = {
+  itemId: string
+  title: string
+  startingPrice: number
+  status: string
+}
+
 const baseUrl = import.meta.env.VITE_API_BASE_URL
 
 function App() {
@@ -15,7 +22,7 @@ function App() {
   const [title, setTitle] = useState('')
   const [startingPrice, setStartingPrice] = useState('')
   const [creating, setCreating] = useState(false)
-  const [createdItemId, setCreatedItemId] = useState<string | null>(null)
+  const [createdItem, setCreatedItem] = useState<ItemResponse | null>(null)
   const [createError, setCreateError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -31,16 +38,19 @@ function App() {
   const createItem = async () => {
     setCreating(true)
     setCreateError(null)
-    setCreatedItemId(null)
+    setCreatedItem(null)
     try {
-      const res = await fetch(`${baseUrl}/api/items`, {
+      const createRes = await fetch(`${baseUrl}/api/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, startingPrice: Number(startingPrice) }),
       })
-      if (!res.ok) throw new Error(`Request failed: ${res.status}`)
-      const data = (await res.json()) as { itemId: string }
-      setCreatedItemId(data.itemId)
+      if (!createRes.ok) throw new Error(`Request failed: ${createRes.status}`)
+      const { itemId } = (await createRes.json()) as { itemId: string }
+
+      const itemRes = await fetch(`${baseUrl}/api/items/${itemId}`)
+      if (!itemRes.ok) throw new Error(`Request failed: ${itemRes.status}`)
+      setCreatedItem((await itemRes.json()) as ItemResponse)
     } catch (err) {
       setCreateError((err as Error).message)
     } finally {
@@ -74,7 +84,28 @@ function App() {
         {creating ? 'Creating...' : 'Create item'}
       </button>
 
-      {createdItemId && <p>Created item: {createdItemId}</p>}
+      {createdItem && (
+        <table>
+          <tbody>
+            <tr>
+              <td>Item ID</td>
+              <td>{createdItem.itemId}</td>
+            </tr>
+            <tr>
+              <td>Title</td>
+              <td>{createdItem.title}</td>
+            </tr>
+            <tr>
+              <td>Starting price</td>
+              <td>{createdItem.startingPrice}</td>
+            </tr>
+            <tr>
+              <td>Status</td>
+              <td>{createdItem.status}</td>
+            </tr>
+          </tbody>
+        </table>
+      )}
       {createError && <p>Failed to create item: {createError}</p>}
     </>
   )

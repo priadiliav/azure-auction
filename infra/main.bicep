@@ -43,6 +43,18 @@ param appInsightsName string = 'auction-insights'
 @description('Name of the Service Bus namespace.')
 param serviceBusNamespaceName string = 'auction-bus'
 
+@description('Name of the logical SQL Server.')
+param sqlServerName string = 'auction-sql'
+
+@description('Name of the SQL Database.')
+param sqlDatabaseName string = 'auction-db'
+
+@description('AAD object id of the Entra ID admin for the SQL Server.')
+param sqlAadAdminObjectId string
+
+@description('Display name of the Entra ID admin (shown in the portal only).')
+param sqlAadAdminLogin string
+
 module containerRegistry 'modules/containerRegistry.bicep' = {
   name: 'containerRegistry'
   params: {
@@ -74,6 +86,17 @@ module serviceBus 'modules/serviceBus.bicep' = {
   params: {
     name: serviceBusNamespaceName
     location: location
+  }
+}
+
+module sqlDatabase 'modules/sqlDatabase.bicep' = {
+  name: 'sqlDatabase'
+  params: {
+    serverName: sqlServerName
+    databaseName: sqlDatabaseName
+    location: location
+    aadAdminObjectId: sqlAadAdminObjectId
+    aadAdminLogin: sqlAadAdminLogin
   }
 }
 
@@ -109,6 +132,10 @@ module containerApp 'modules/containerApp.bicep' = {
       {
         name: 'ServiceBus__FullyQualifiedNamespace'
         value: serviceBus.outputs.fullyQualifiedNamespace
+      }
+      {
+        name: 'ConnectionStrings__AuctionDb'
+        value: 'Server=tcp:${sqlDatabase.outputs.serverFqdn},1433;Database=${sqlDatabase.outputs.databaseName};Authentication=Active Directory Default;Encrypt=True;TrustServerCertificate=False;'
       }
     ]
   }

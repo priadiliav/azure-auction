@@ -1,7 +1,10 @@
+using Auction.Application.Items;
 using Auction.Application.Items.CreateItem;
 using Auction.Infrastructure.Messaging;
+using Auction.Infrastructure.Persistence;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,6 +18,12 @@ public static class DependencyInjection
             ?? throw new InvalidOperationException("Missing configuration: ServiceBus:FullyQualifiedNamespace");
 
         services.AddSingleton(new ServiceBusClient(serviceBusNamespace, new DefaultAzureCredential()));
-        services.AddSingleton<IItemEventPublisher, ServiceBusItemEventPublisher>();
+        services.AddSingleton<IItemPublisher, ServiceBusItemPublisher>();
+
+        var connectionString = configuration.GetConnectionString("AuctionDb")
+            ?? throw new InvalidOperationException("Missing configuration: ConnectionStrings:AuctionDb");
+
+        services.AddDbContext<AuctionDbContext>(options => options.UseSqlServer(connectionString));
+        services.AddScoped<IItemRepository, ItemRepository>();
     }
 }
