@@ -55,10 +55,14 @@ else
   echo "Created federated credential"
 fi
 
-# 4. Least-privilege role assignments, scoped to the specific resources (not the whole subscription)
 az role assignment create \
   --assignee "$APP_ID" \
   --role "AcrPush" \
+  --scope "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.ContainerRegistry/registries/${ACR_NAME}"
+
+az role assignment create \
+  --assignee "$APP_ID" \
+  --role "Container Registry Tasks Contributor" \
   --scope "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.ContainerRegistry/registries/${ACR_NAME}"
 
 az role assignment create \

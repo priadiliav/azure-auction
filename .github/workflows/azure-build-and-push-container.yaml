@@ -62,7 +62,7 @@ jobs:
           az acr build \
             --registry ${{ env.REGISTRY_NAME }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
-            --image auction-functions:${{ github.sha }} \
+            --image auction-function:${{ github.sha }} \
             --file be/src/Auction.Functions/Dockerfile \
             be
 
@@ -71,4 +71,4 @@ jobs:
           az containerapp update \
             --name ${{ vars.FUNCTION_APP_NAME }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
-            --image ${{ env.REGISTRY_NAME }}.azurecr.io/auction-functions:${{ github.sha }}
+            --image ${{ env.REGISTRY_NAME }}.azurecr.io/auction-function:${{ github.sha }}
