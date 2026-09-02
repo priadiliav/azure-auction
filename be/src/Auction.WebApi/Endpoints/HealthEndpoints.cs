@@ -8,6 +8,7 @@ public static class HealthEndpoints
     {
         app.MapGet("/api/health", () =>
         {
+            
             var version = Assembly.GetExecutingAssembly()
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
                 ?? "unknown";

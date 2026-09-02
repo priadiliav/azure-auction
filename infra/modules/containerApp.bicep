@@ -31,10 +31,13 @@ param minReplicas int = 1
 @description('Maximum number of replicas.')
 param maxReplicas int = 1
 
+@description('Container App kind. Use \'functionapp\' to run this as Azure Functions on Container Apps instead of a plain container app.')
+param kind string = 'containerapps'
+
 resource containerApp 'Microsoft.App/containerapps@2026-01-01' = {
   name: name
   location: location
-  kind: 'containerapps'
+  kind: kind
   identity: {
     type: 'SystemAssigned'
   }
@@ -125,7 +128,7 @@ resource containerApp 'Microsoft.App/containerapps@2026-01-01' = {
         maxReplicas: maxReplicas
         cooldownPeriod: 300
         pollingInterval: 30
-        rules: [
+        rules: kind == 'functionapp' ? [] : [
           {
             name: 'http-scaler'
             http: {

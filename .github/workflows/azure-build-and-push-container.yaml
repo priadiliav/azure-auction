@@ -64,9 +64,9 @@ jobs:
             --file be/src/Auction.Functions/Dockerfile \
             be
 
-      - name: Update Function App with new image
+      - name: Update Container App with new image
         run: |
-          az functionapp config container set \
+          az containerapp update \
             --name ${{ vars.FUNCTION_APP_NAME }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
             --image ${{ env.REGISTRY_NAME }}.azurecr.io/auction-functions:${{ github.sha }}

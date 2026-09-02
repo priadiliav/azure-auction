@@ -50,8 +50,8 @@ az role assignment create \
 
 az role assignment create \
   --assignee "$APP_ID" \
-  --role "Website Contributor" \
-  --scope "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Web/sites/${FUNCTION_APP_NAME}"
+  --role "Container Apps Contributor" \
+  --scope "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.App/containerApps/${FUNCTION_APP_NAME}"
 
 echo ""
 echo "Add these as GitHub repo secrets (Settings -> Secrets and variables -> Actions):"
