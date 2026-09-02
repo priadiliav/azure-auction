@@ -19,13 +19,13 @@ param functionAppName string = 'auction-function'
 param functionStorageAccountName string
 
 @description('Name of the static web app.')
-param staticWebAppName string = 'auction-swa'
+param staticWebAppName string
 
 @description('URL of the repository to deploy from.')
-param repositoryUrl string = 'https://github.com/vpriadilia/auction'
+param repositoryUrl string
 
 @description('Branch of the repository to deploy from. Defaults to \'main\'.')
-param branch string = 'main'
+param branch string
 
 @description('GitHub personal access token (repo + workflow scopes) used to set up the CI/CD integration.')
 @secure()
