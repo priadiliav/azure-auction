@@ -33,6 +33,7 @@ jobs:
         run: |
           az acr build \
             --registry ${{ env.REGISTRY_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
             --image auction-webapi:${{ github.sha }} \
             --file be/src/Auction.WebApi/Dockerfile \
             be
@@ -60,6 +61,7 @@ jobs:
         run: |
           az acr build \
             --registry ${{ env.REGISTRY_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
             --image auction-functions:${{ github.sha }} \
             --file be/src/Auction.Functions/Dockerfile \
             be

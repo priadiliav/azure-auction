@@ -10,6 +10,12 @@ GITHUB_OWNER="vpriadilia"
 GITHUB_REPO="auction"
 GITHUB_BRANCH="main"
 
+# GitHub issues immutable OIDC subject claims (repo:owner@id/repo@id) for repos created/renamed
+# after 2026-07-15, to prevent subject reuse if a repo is later renamed or transferred.
+# These IDs are permanent for this repo - grab them again only if the repo is ever recreated.
+GITHUB_OWNER_ID="137265697"
+GITHUB_REPO_ID="1353653679"
+
 RESOURCE_GROUP="auction-rg"
 ACR_NAME="auctioncr"
 API_CONTAINER_APP_NAME="auction-api"
@@ -28,14 +34,26 @@ fi
 
 az ad sp create --id "$APP_ID" >/dev/null 2>&1 || echo "Service principal already exists"
 
-az ad app federated-credential create \
-  --id "$APP_ID" \
-  --parameters "{
-    \"name\": \"github-actions-${GITHUB_BRANCH}\",
+FEDERATED_CRED_NAME="github-actions-${GITHUB_BRANCH}"
+FEDERATED_CRED_PARAMS="{
+    \"name\": \"${FEDERATED_CRED_NAME}\",
     \"issuer\": \"https://token.actions.githubusercontent.com\",
-    \"subject\": \"repo:${GITHUB_OWNER}/${GITHUB_REPO}:ref:refs/heads/${GITHUB_BRANCH}\",
+    \"subject\": \"repo:${GITHUB_OWNER}@${GITHUB_OWNER_ID}/${GITHUB_REPO}@${GITHUB_REPO_ID}:ref:refs/heads/${GITHUB_BRANCH}\",
     \"audiences\": [\"api://AzureADTokenExchange\"]
-  }" || echo "Federated credential already exists"
+  }"
+
+if az ad app federated-credential show --id "$APP_ID" --federated-credential-id "$FEDERATED_CRED_NAME" -o none 2>/dev/null; then
+  az ad app federated-credential update \
+    --id "$APP_ID" \
+    --federated-credential-id "$FEDERATED_CRED_NAME" \
+    --parameters "$FEDERATED_CRED_PARAMS"
+  echo "Updated existing federated credential to immutable subject format"
+else
+  az ad app federated-credential create \
+    --id "$APP_ID" \
+    --parameters "$FEDERATED_CRED_PARAMS"
+  echo "Created federated credential"
+fi
 
 # 4. Least-privilege role assignments, scoped to the specific resources (not the whole subscription)
 az role assignment create \
