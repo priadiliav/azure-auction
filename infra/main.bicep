@@ -65,6 +65,9 @@ param itemBlobStorageAccountName string = 'auctionitemsblob'
 @secure()
 param blobsExtensionSystemKey string
 
+@description('Google OAuth 2.0 Client ID used to validate Google Sign-In ID tokens. Not a secret - it is also embedded in the frontend.')
+param googleClientId string
+
 module containerRegistry 'modules/containerRegistry.bicep' = {
   name: 'containerRegistry'
   params: {
@@ -177,6 +180,10 @@ module containerApp 'modules/containerApp.bicep' = {
         name: 'ConnectionStrings__AuctionDb'
         value: 'Server=tcp:${sqlDatabase.outputs.serverFqdn},1433;Database=${sqlDatabase.outputs.databaseName};Authentication=Active Directory Default;Encrypt=True;TrustServerCertificate=False;'
       }
+      {
+        name: 'Authentication__Google__ClientId'
+        value: googleClientId
+      }
     ]
   }
 }
@@ -238,6 +245,10 @@ module functionApp 'modules/containerApp.bicep' = {
       {
         name: 'AzureSignalRConnectionString__credential'
         value: 'managedIdentity'
+      }
+      {
+        name: 'Authentication__Google__ClientId'
+        value: googleClientId
       }
     ]
   }

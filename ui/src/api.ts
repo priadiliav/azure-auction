@@ -1,5 +1,12 @@
+import { getIdToken } from './auth-context'
+
 const baseUrl = import.meta.env.VITE_API_BASE_URL
 const functionsBaseUrl = import.meta.env.VITE_FUNCTIONS_BASE_URL
+
+function authHeaders(): HeadersInit {
+  const token = getIdToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
 
 export type HealthResponse = {
   status: string
@@ -40,15 +47,16 @@ export const fetchItems = () => fetch(`${baseUrl}/api/items`).then((res) => hand
 export const createItem = (input: CreateItemInput) =>
   fetch(`${baseUrl}/api/items`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(input),
   }).then((res) => handle<{ itemId: string }>(res))
 
 export const requestBlobUploadSas = (itemId: string, fileName: string, contentType: string) => {
   const query = new URLSearchParams({ fileName, contentType })
-  return fetch(`${functionsBaseUrl}/api/items/${itemId}/blob-sas?${query}`, { method: 'POST' }).then((res) =>
-    handle<BlobUploadSas>(res),
-  )
+  return fetch(`${functionsBaseUrl}/api/items/${itemId}/blob-sas?${query}`, {
+    method: 'POST',
+    headers: authHeaders(),
+  }).then((res) => handle<BlobUploadSas>(res))
 }
 
 export const uploadItemImage = async (uploadUrl: string, file: File) => {
@@ -68,11 +76,11 @@ export type PlaceBidResult =
   | { status: 'conflict'; reason: 'BidTooLow' | 'AuctionEnded'; currentPrice: number }
   | { status: 'not-found' }
 
-export const placeBid = async (itemId: string, amount: number, bidderName: string): Promise<PlaceBidResult> => {
+export const placeBid = async (itemId: string, amount: number): Promise<PlaceBidResult> => {
   const res = await fetch(`${baseUrl}/api/items/${itemId}/bids`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ amount, bidderName }),
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ amount }),
   })
 
   if (res.status === 404) {

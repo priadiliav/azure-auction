@@ -3,6 +3,7 @@ import { Box, Button, Card, CardContent, Chip, Stack, Typography } from '@mui/ma
 import HourglassEmptyOutlinedIcon from '@mui/icons-material/HourglassEmptyOutlined'
 import type { Item } from '../api'
 import { BidDialog } from './BidDialog'
+import { useAuth } from '../auth-context'
 
 type ItemCardProps = {
   item: Item
@@ -10,10 +11,12 @@ type ItemCardProps = {
 
 export function ItemCard({ item }: ItemCardProps) {
   const [bidOpen, setBidOpen] = useState(false)
+  const { user } = useAuth()
 
   const isQueued = !item.blobUrl
   const isEnded = item.status === 'Ended'
-  const canBid = item.status === 'Listed' && !isEnded
+  const isBiddable = item.status === 'Listed' && !isEnded
+  const canBid = isBiddable && !!user
 
   return (
     <>
@@ -52,9 +55,15 @@ export function ItemCard({ item }: ItemCardProps) {
             </Typography>
           )}
 
-          {canBid && (
-            <Button fullWidth variant="outlined" sx={{ mt: 1.5 }} onClick={() => setBidOpen(true)}>
-              Place bid
+          {isBiddable && (
+            <Button
+              fullWidth
+              variant="outlined"
+              sx={{ mt: 1.5 }}
+              disabled={!user}
+              onClick={() => setBidOpen(true)}
+            >
+              {user ? 'Place bid' : 'Sign in to bid'}
             </Button>
           )}
         </CardContent>

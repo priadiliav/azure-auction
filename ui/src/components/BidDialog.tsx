@@ -11,6 +11,7 @@ import {
   Typography,
 } from '@mui/material'
 import { placeBid } from '../api'
+import { useAuth } from '../auth-context'
 
 type BidDialogProps = {
   open: boolean
@@ -20,20 +21,15 @@ type BidDialogProps = {
   currentPrice: number
 }
 
-const BIDDER_NAME_STORAGE_KEY = 'auction:bidderName'
-
 export function BidDialog({ open, onClose, itemId, itemTitle, currentPrice }: BidDialogProps) {
   const queryClient = useQueryClient()
+  const { user } = useAuth()
 
   const [amount, setAmount] = useState('')
-  const [bidderName, setBidderName] = useState(() => localStorage.getItem(BIDDER_NAME_STORAGE_KEY) ?? '')
   const [minPrice, setMinPrice] = useState(currentPrice)
 
   const bidMutation = useMutation({
-    mutationFn: () => {
-      localStorage.setItem(BIDDER_NAME_STORAGE_KEY, bidderName)
-      return placeBid(itemId, Number(amount), bidderName)
-    },
+    mutationFn: () => placeBid(itemId, Number(amount)),
     onSuccess: (result) => {
       if (result.status === 'accepted') {
         queryClient.invalidateQueries({ queryKey: ['items'] })
@@ -55,18 +51,17 @@ export function BidDialog({ open, onClose, itemId, itemTitle, currentPrice }: Bi
           Current price: ${minPrice}
         </Typography>
 
-        <TextField
-          label="Your name"
-          fullWidth
-          autoFocus
-          value={bidderName}
-          onChange={(e) => setBidderName(e.target.value)}
-          sx={{ mb: 2 }}
-        />
+        {user && (
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Bidding as <strong>{user.name}</strong>
+          </Typography>
+        )}
+
         <TextField
           label="Your bid"
           type="number"
           fullWidth
+          autoFocus
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />
@@ -93,7 +88,7 @@ export function BidDialog({ open, onClose, itemId, itemTitle, currentPrice }: Bi
         <Button onClick={onClose}>Cancel</Button>
         <Button
           variant="contained"
-          disabled={!bidderName || !amount || Number(amount) <= minPrice || bidMutation.isPending}
+          disabled={!amount || Number(amount) <= minPrice || bidMutation.isPending}
           onClick={() => bidMutation.mutate()}
         >
           {bidMutation.isPending ? 'Placing bid...' : 'Place bid'}

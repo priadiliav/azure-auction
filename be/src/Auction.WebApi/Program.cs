@@ -1,7 +1,9 @@
 using Auction.Application.Items.CreateItem;
 using Auction.Infrastructure;
+using Auction.Infrastructure.Auth;
 using Auction.WebApi.Endpoints;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,18 @@ builder.Services.AddOpenApi();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateItemCommand).Assembly));
 
 builder.Services.AddInfrastructure(builder.Configuration);
+
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"]
+    ?? throw new InvalidOperationException("Missing configuration: Authentication:Google:ClientId");
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = GoogleTokenValidation.Issuer;
+        options.Audience = googleClientId;
+    });
+builder.Services.AddAuthorization();
 
 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING")))
 {
@@ -38,6 +52,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors("Frontend");
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapHealthEndpoints();
 app.MapItemsEndpoints();

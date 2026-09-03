@@ -1,3 +1,4 @@
+using Auction.Functions.Auth;
 using Auction.Infrastructure;
 using Azure.Monitor.OpenTelemetry.Exporter;
 using Microsoft.Azure.Functions.Worker.Builder;
@@ -8,6 +9,8 @@ using Microsoft.Extensions.Hosting;
 var builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();
+
+builder.UseMiddleware<GoogleAuthMiddleware>();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 

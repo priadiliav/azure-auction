@@ -12,7 +12,12 @@ public class Bid
     {
     }
 
-    public Bid(Guid id, Guid itemId, decimal amount, string bidderName, DateTimeOffset placedAt)
+    public Bid(
+        Guid id, 
+        Guid itemId, 
+        decimal amount, 
+        string bidderName, 
+        DateTimeOffset placedAt)
     {
         Id = id;
         ItemId = itemId;

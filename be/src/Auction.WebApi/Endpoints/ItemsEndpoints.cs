@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Auction.Application.Items.CreateItem;
 using Auction.Application.Items.GetItem;
 using Auction.Application.Items.GetItems;
@@ -14,7 +15,7 @@ public static class ItemsEndpoints
         {
             var itemId = await mediator.Send(command);
             return Results.Ok(new { itemId });
-        });
+        }).RequireAuthorization();
 
         app.MapGet("/api/items", async (IMediator mediator) =>
         {
@@ -30,9 +31,10 @@ public static class ItemsEndpoints
                 : Results.Ok(result);
         });
 
-        app.MapPost("/api/items/{id:guid}/bids", async (Guid id, PlaceBidRequest request, IMediator mediator) =>
+        app.MapPost("/api/items/{id:guid}/bids", async (Guid id, PlaceBidRequest request, ClaimsPrincipal user, IMediator mediator) =>
         {
-            var result = await mediator.Send(new PlaceBidCommand(id, request.Amount, request.BidderName));
+            var bidderName = user.FindFirstValue("name") ?? user.FindFirstValue(ClaimTypes.Email) ?? "Unknown";
+            var result = await mediator.Send(new PlaceBidCommand(id, request.Amount, bidderName));
 
             return result.Reason switch
             {
@@ -41,8 +43,8 @@ public static class ItemsEndpoints
                 PlaceBidFailureReason.BidTooLow => Results.Conflict(new { reason = "BidTooLow", currentPrice = result.CurrentPrice }),
                 _ => Results.Ok(new { currentPrice = result.CurrentPrice }),
             };
-        });
+        }).RequireAuthorization();
     }
 }
 
-public record PlaceBidRequest(decimal Amount, string BidderName);
+public record PlaceBidRequest(decimal Amount);
