@@ -4,12 +4,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Auction.Functions.Functions;
 
-public class AuctionCloserTimerTrigger(
+public class ItemCloserTimerTrigger(
     IItemRepository itemRepository,
     IStatePublisher statePublisher,
-    ILogger<AuctionCloserTimerTrigger> logger)
+    ILogger<ItemCloserTimerTrigger> logger)
 {
-    [Function(nameof(AuctionCloserTimerTrigger))]
+    [Function(nameof(ItemCloserTimerTrigger))]
     public async Task Run(
         [TimerTrigger("0 * * * * *")] TimerInfo timer,
         CancellationToken cancellationToken)
