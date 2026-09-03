@@ -20,6 +20,8 @@ public class BlobSasHttpTrigger(
         "image/webp",
     };
 
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
     [Function(nameof(BlobSasHttpTrigger))]
     public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "items/{itemId:guid}/blob-sas")]
@@ -51,7 +53,7 @@ public class BlobSasHttpTrigger(
 
         var response = req.CreateResponse(HttpStatusCode.OK);
         response.Headers.Add("Content-Type", "application/json; charset=utf-8");
-        await response.WriteStringAsync(JsonSerializer.Serialize(sas), cancellationToken);
+        await response.WriteStringAsync(JsonSerializer.Serialize(sas, JsonOptions), cancellationToken);
 
         logger.LogInformation("Issued upload SAS for item {ItemId}", itemId);
         return response;
