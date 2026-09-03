@@ -18,6 +18,10 @@ export function useItemUpdates() {
       queryClient.invalidateQueries({ queryKey: ['items'] })
     })
 
+    connection.on('bidPlaced', () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] })
+    })
+
     connection.start().catch((err) => console.error('SignalR connection failed:', err))
 
     return () => {

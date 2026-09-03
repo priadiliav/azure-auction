@@ -11,8 +11,10 @@ export type Item = {
   itemId: string
   title: string
   startingPrice: number
+  currentPrice: number
   status: string
   blobUrl: string | null
+  endsAt: string
 }
 
 export type CreateItemInput = {
@@ -59,4 +61,30 @@ export const uploadItemImage = async (uploadUrl: string, file: File) => {
     body: file,
   })
   if (!res.ok) throw new Error(`Image upload failed: ${res.status}`)
+}
+
+export type PlaceBidResult =
+  | { status: 'accepted'; currentPrice: number }
+  | { status: 'conflict'; reason: 'BidTooLow' | 'AuctionEnded'; currentPrice: number }
+  | { status: 'not-found' }
+
+export const placeBid = async (itemId: string, amount: number, bidderName: string): Promise<PlaceBidResult> => {
+  const res = await fetch(`${baseUrl}/api/items/${itemId}/bids`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount, bidderName }),
+  })
+
+  if (res.status === 404) {
+    return { status: 'not-found' }
+  }
+  if (res.status === 409) {
+    const body = (await res.json()) as { reason: 'BidTooLow' | 'AuctionEnded'; currentPrice: number }
+    return { status: 'conflict', reason: body.reason, currentPrice: body.currentPrice }
+  }
+  if (!res.ok) {
+    throw new Error(`Request failed: ${res.status}`)
+  }
+  const body = (await res.json()) as { currentPrice: number }
+  return { status: 'accepted', currentPrice: body.currentPrice }
 }

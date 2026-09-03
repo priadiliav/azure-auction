@@ -1,7 +1,6 @@
-import { AppBar, Box, Button, IconButton, InputAdornment, TextField, Toolbar, Typography } from '@mui/material'
+import { AppBar, Box, Button, InputAdornment, TextField, Toolbar, Typography } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import AddIcon from '@mui/icons-material/Add'
-import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import { ApiStatusIndicator } from './ApiStatusIndicator'
 
 type HeaderProps = {
@@ -45,9 +44,6 @@ export function Header({ onSellClick }: HeaderProps) {
           Sell
         </Button>
         <ApiStatusIndicator />
-        <IconButton disabled>
-          <AccountCircleIcon />
-        </IconButton>
       </Toolbar>
     </AppBar>
   )
