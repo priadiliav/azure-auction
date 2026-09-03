@@ -11,5 +11,6 @@ az deployment group what-if `
 
 
 ## Create Item HSD
-<img width="1573" height="721" alt="image" src="https://github.com/user-attachments/assets/32c2d8ad-b5a9-40f6-94b6-5fd4efca7844" />
+<img width="1666" height="835" alt="image" src="https://github.com/user-attachments/assets/45fe6638-5ea8-491b-8ac2-282150316ea2" />
+
 
