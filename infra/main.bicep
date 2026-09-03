@@ -199,12 +199,12 @@ module functionApp 'modules/containerApp.bicep' = {
         value: 'Server=tcp:${sqlDatabase.outputs.serverFqdn},1433;Database=${sqlDatabase.outputs.databaseName};Authentication=Active Directory Default;Encrypt=True;TrustServerCertificate=False;'
       }
       {
-        name: 'AzureSignalRConnection__serviceUri'
+        name: 'AzureSignalRConnectionString__serviceUri'
         value: 'https://${signalR.outputs.hostName}'
       }
       {
-        name: 'AzureSignalRConnection__credential'
-        value: 'managedidentity'
+        name: 'AzureSignalRConnectionString__credential'
+        value: 'managedIdentity'
       }
     ]
   }

@@ -8,9 +8,7 @@ namespace Auction.Functions.Functions;
 public class StateChangedNotifierQueueTrigger(ILogger<StateChangedNotifierQueueTrigger> logger)
 {
     [Function(nameof(StateChangedNotifierQueueTrigger))]
-    [SignalROutput(
-        HubName = "items", 
-        ConnectionStringSetting = "AzureSignalRConnection")]
+    [SignalROutput(HubName = "items")]
     public SignalRMessageAction Run(
         [ServiceBusTrigger(
             queueName: "states", 

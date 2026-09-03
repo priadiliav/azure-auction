@@ -5,6 +5,8 @@ package-lock.json
 obj/
 bin/
 
+be.sln.DotSettings.user
+
 logs
 *.log
 npm-debug.log*
