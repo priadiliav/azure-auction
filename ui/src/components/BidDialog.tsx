@@ -2,41 +2,42 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Alert,
+  Avatar,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
   TextField,
   Typography,
 } from '@mui/material'
-import { placeBid } from '../api'
+import { placeBid, type Item } from '../api'
 import { useAuth } from '../auth-context'
 
 type BidDialogProps = {
   open: boolean
   onClose: () => void
-  itemId: string
-  itemTitle: string
-  currentPrice: number
+  item: Item
 }
 
-export function BidDialog({ open, onClose, itemId, itemTitle, currentPrice }: BidDialogProps) {
+export function BidDialog({ open, onClose, item }: BidDialogProps) {
   const queryClient = useQueryClient()
   const { user } = useAuth()
 
   const [amount, setAmount] = useState('')
-  const [minPrice, setMinPrice] = useState(currentPrice)
 
   const bidMutation = useMutation({
-    mutationFn: () => placeBid(itemId, Number(amount)),
+    mutationFn: () => placeBid(item.itemId, Number(amount)),
     onSuccess: (result) => {
       if (result.status === 'accepted') {
         queryClient.invalidateQueries({ queryKey: ['items'] })
         setAmount('')
         onClose()
-      } else if (result.status === 'conflict') {
-        setMinPrice(result.currentPrice)
       }
     },
   })
@@ -45,10 +46,10 @@ export function BidDialog({ open, onClose, itemId, itemTitle, currentPrice }: Bi
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>Bid on &quot;{itemTitle}&quot;</DialogTitle>
+      <DialogTitle>Bid on &quot;{item.title}&quot;</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Current price: ${minPrice}
+          Current price: ${item.currentPrice}
         </Typography>
 
         {user && (
@@ -83,12 +84,31 @@ export function BidDialog({ open, onClose, itemId, itemTitle, currentPrice }: Bi
             Failed to place bid: {bidMutation.error.message}
           </Alert>
         )}
+
+        {item.recentBids.length > 0 && (
+          <>
+            <Divider sx={{ mt: 3, mb: 1 }} />
+            <Typography variant="subtitle2" color="text.secondary">
+              Recent bids
+            </Typography>
+            <List dense disablePadding>
+              {item.recentBids.map((bid) => (
+                <ListItem key={`${bid.bidderId}-${bid.placedAt}`} disableGutters>
+                  <ListItemAvatar sx={{ minWidth: 40 }}>
+                    <Avatar src={bid.bidderAvatarUrl} alt={bid.bidderName} sx={{ width: 28, height: 28 }} />
+                  </ListItemAvatar>
+                  <ListItemText primary={bid.bidderName} secondary={`$${bid.amount}`} />
+                </ListItem>
+              ))}
+            </List>
+          </>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button
           variant="contained"
-          disabled={!amount || Number(amount) <= minPrice || bidMutation.isPending}
+          disabled={!amount || Number(amount) <= item.currentPrice || bidMutation.isPending}
           onClick={() => bidMutation.mutate()}
         >
           {bidMutation.isPending ? 'Placing bid...' : 'Place bid'}

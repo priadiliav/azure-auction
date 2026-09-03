@@ -31,6 +31,7 @@ export function CreateItemDialog({ open, onClose }: CreateItemDialogProps) {
 
   const [activeStep, setActiveStep] = useState(0)
   const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [startingPrice, setStartingPrice] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -50,7 +51,7 @@ export function CreateItemDialog({ open, onClose }: CreateItemDialogProps) {
 
   const createItemMutation = useMutation({
     mutationFn: async () => {
-      const { itemId } = await createItem({ title, startingPrice: Number(startingPrice) })
+      const { itemId } = await createItem({ title, description, startingPrice: Number(startingPrice) })
       const sas = await requestBlobUploadSas(itemId, imageFile!.name, imageFile!.type)
       await uploadItemImage(sas.uploadUrl, imageFile!)
       return itemId
@@ -65,6 +66,7 @@ export function CreateItemDialog({ open, onClose }: CreateItemDialogProps) {
   const reset = () => {
     setActiveStep(0)
     setTitle('')
+    setDescription('')
     setStartingPrice('')
     setImageFile(null)
     setPreviewUrl(null)
@@ -101,6 +103,14 @@ export function CreateItemDialog({ open, onClose }: CreateItemDialogProps) {
               fullWidth
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+            />
+            <TextField
+              label="Description"
+              fullWidth
+              multiline
+              minRows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
             <TextField
               label="Starting price"
@@ -179,7 +189,7 @@ export function CreateItemDialog({ open, onClose }: CreateItemDialogProps) {
         <Button onClick={handleClose}>Cancel</Button>
 
         {activeStep === 0 && (
-          <Button variant="contained" disabled={!title || !startingPrice} onClick={() => setActiveStep(1)}>
+          <Button variant="contained" disabled={!title || !description || !startingPrice} onClick={() => setActiveStep(1)}>
             Next
           </Button>
         )}

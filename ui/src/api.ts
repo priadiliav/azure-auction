@@ -14,18 +14,30 @@ export type HealthResponse = {
   environment: string
 }
 
+export type RecentBid = {
+  bidderId: string
+  bidderName: string
+  bidderAvatarUrl: string
+  amount: number
+  placedAt: string
+}
+
 export type Item = {
   itemId: string
   title: string
+  description: string
   startingPrice: number
   currentPrice: number
   status: string
   blobUrl: string | null
   endsAt: string
+  sellerId: string
+  recentBids: RecentBid[]
 }
 
 export type CreateItemInput = {
   title: string
+  description: string
   startingPrice: number
 }
 
@@ -43,6 +55,9 @@ async function handle<T>(res: Response): Promise<T> {
 export const fetchHealth = () => fetch(`${baseUrl}/api/health`).then((res) => handle<HealthResponse>(res))
 
 export const fetchItems = () => fetch(`${baseUrl}/api/items`).then((res) => handle<Item[]>(res))
+
+export const fetchMyItems = () =>
+  fetch(`${baseUrl}/api/items/mine`, { headers: authHeaders() }).then((res) => handle<Item[]>(res))
 
 export const createItem = (input: CreateItemInput) =>
   fetch(`${baseUrl}/api/items`, {

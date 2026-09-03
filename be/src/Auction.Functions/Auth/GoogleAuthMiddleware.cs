@@ -1,11 +1,14 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using Auction.Application.Users;
+using Auction.Domain.Users;
 using Auction.Functions.Functions;
 using Auction.Infrastructure.Auth;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Auction.Functions.Auth;
 
@@ -49,7 +52,11 @@ public class GoogleAuthMiddleware(IConfiguration configuration) : IFunctionsWork
         {
             var validationParameters = await GoogleTokenValidation.CreateValidationParametersAsync(
                 clientId, context.CancellationToken);
-            new JwtSecurityTokenHandler().ValidateToken(token, validationParameters, out _);
+            var principal = new JwtSecurityTokenHandler().ValidateToken(token, validationParameters, out _);
+
+            var (id, email, name, avatarUrl) = GoogleTokenValidation.ExtractUserProfile(principal);
+            var userRepository = context.InstanceServices.GetRequiredService<IUserRepository>();
+            await userRepository.UpsertAsync(new User(id, email, name, avatarUrl), context.CancellationToken);
         }
         catch
         {

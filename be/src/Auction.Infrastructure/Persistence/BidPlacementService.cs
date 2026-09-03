@@ -10,7 +10,7 @@ public class BidPlacementService(AuctionDbContext dbContext) : IBidPlacementServ
     private const int MaxConcurrencyRetries = 3;
 
     public async Task<PlaceBidResult> PlaceBidAsync(
-        Guid itemId, decimal amount, string bidderName, CancellationToken cancellationToken)
+        Guid itemId, decimal amount, string bidderId, CancellationToken cancellationToken)
     {
         for (var attempt = 0; attempt < MaxConcurrencyRetries; attempt++)
         {
@@ -31,7 +31,7 @@ public class BidPlacementService(AuctionDbContext dbContext) : IBidPlacementServ
             }
 
             item.PlaceBid(amount);
-            dbContext.Bids.Add(new Bid(Guid.CreateVersion7(), itemId, amount, bidderName, DateTimeOffset.UtcNow));
+            dbContext.Bids.Add(new Bid(Guid.CreateVersion7(), itemId, amount, bidderId, DateTimeOffset.UtcNow));
 
             try
             {

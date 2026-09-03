@@ -28,4 +28,9 @@ public interface IItemRepository
     /// Retrieves items whose auction end time has passed but that haven't been closed yet.
     /// </summary>
     Task<IReadOnlyList<Item>> GetExpiredActiveAsync(DateTimeOffset now, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Retrieves items created by a given seller.
+    /// </summary>
+    Task<IReadOnlyList<Item>> GetBySellerIdAsync(string sellerId, CancellationToken cancellationToken);
 }

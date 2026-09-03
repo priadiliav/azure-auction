@@ -1,4 +1,17 @@
-import { AppBar, Avatar, Box, Button, InputAdornment, TextField, Toolbar, Typography } from '@mui/material'
+import { useState } from 'react'
+import {
+  AppBar,
+  Avatar,
+  Box,
+  Button,
+  IconButton,
+  InputAdornment,
+  Menu,
+  MenuItem,
+  TextField,
+  Toolbar,
+  Typography,
+} from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import AddIcon from '@mui/icons-material/Add'
 import { ApiStatusIndicator } from './ApiStatusIndicator'
@@ -6,10 +19,12 @@ import { useAuth } from '../auth-context'
 
 type HeaderProps = {
   onSellClick: () => void
+  onSettingsClick: () => void
 }
 
-export function Header({ onSellClick }: HeaderProps) {
+export function Header({ onSellClick, onSettingsClick }: HeaderProps) {
   const { user, buttonRef, signOut } = useAuth()
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
 
   return (
     <AppBar
@@ -50,15 +65,30 @@ export function Header({ onSellClick }: HeaderProps) {
         )}
 
         {user ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Avatar src={user.picture} alt={user.name} sx={{ width: 32, height: 32 }} />
-            <Typography variant="body2" noWrap sx={{ maxWidth: 120 }}>
-              {user.name}
-            </Typography>
-            <Button size="small" onClick={signOut}>
-              Sign out
-            </Button>
-          </Box>
+          <>
+            <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)} size="small">
+              <Avatar src={user.picture} alt={user.name} sx={{ width: 32, height: 32 }} />
+            </IconButton>
+            <Menu anchorEl={menuAnchor} open={!!menuAnchor} onClose={() => setMenuAnchor(null)}>
+              <MenuItem disabled>{user.name}</MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setMenuAnchor(null)
+                  onSettingsClick()
+                }}
+              >
+                Settings
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setMenuAnchor(null)
+                  signOut()
+                }}
+              >
+                Sign out
+              </MenuItem>
+            </Menu>
+          </>
         ) : (
           <Box ref={buttonRef} />
         )}

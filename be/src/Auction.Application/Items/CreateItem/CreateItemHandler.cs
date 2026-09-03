@@ -9,7 +9,7 @@ public class CreateItemHandler(IItemRepository itemRepository)
     public async Task<Guid> Handle(CreateItemCommand request, CancellationToken cancellationToken)
     {
         var itemId = Guid.CreateVersion7();
-        var item = new Item(itemId, request.Title, request.StartingPrice);
+        var item = new Item(itemId, request.Title, request.Description, request.StartingPrice, request.SellerId);
         await itemRepository.AddAsync(item, cancellationToken);
         return itemId;
     }

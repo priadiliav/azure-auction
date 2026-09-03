@@ -1,4 +1,6 @@
 using Auction.Application.Items.CreateItem;
+using Auction.Application.Users;
+using Auction.Domain.Users;
 using Auction.Infrastructure;
 using Auction.Infrastructure.Auth;
 using Auction.WebApi.Endpoints;
@@ -22,6 +24,15 @@ builder.Services
     {
         options.Authority = GoogleTokenValidation.Issuer;
         options.Audience = googleClientId;
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                var userRepository = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+                var (id, email, name, avatarUrl) = GoogleTokenValidation.ExtractUserProfile(context.Principal!);
+                await userRepository.UpsertAsync(new User(id, email, name, avatarUrl), context.HttpContext.RequestAborted);
+            },
+        };
     });
 builder.Services.AddAuthorization();
 
@@ -58,5 +69,6 @@ app.UseAuthorization();
 
 app.MapHealthEndpoints();
 app.MapItemsEndpoints();
+app.MapMeEndpoints();
 
 app.Run();

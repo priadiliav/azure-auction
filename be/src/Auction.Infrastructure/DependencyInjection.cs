@@ -1,5 +1,6 @@
 using Auction.Application.Items;
 using Auction.Application.Items.CreateItem;
+using Auction.Application.Users;
 using Auction.Infrastructure.Messaging;
 using Auction.Infrastructure.Persistence;
 using Auction.Infrastructure.Storage;
@@ -38,5 +39,7 @@ public static class DependencyInjection
         services.AddDbContext<AuctionDbContext>(options => options.UseSqlServer(connectionString));
         services.AddScoped<IItemRepository, ItemRepository>();
         services.AddScoped<IBidPlacementService, BidPlacementService>();
+        services.AddScoped<IBidRepository, BidRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
     }
 }

@@ -6,25 +6,29 @@ public class Item
 
     public Guid Id { get; private set; }
     public string Title { get; private set; } = string.Empty;
+    public string Description { get; private set; } = string.Empty;
     public decimal StartingPrice { get; private set; }
     public decimal CurrentPrice { get; private set; }
     public ItemStatus Status { get; private set; }
     public string? BlobUrl { get; private set; }
     public DateTimeOffset EndsAt { get; private set; }
+    public string SellerId { get; private set; } = string.Empty;
     public byte[] RowVersion { get; private set; } = [];
 
     private Item()
     {
     }
 
-    public Item(Guid id, string title, decimal startingPrice)
+    public Item(Guid id, string title, string description, decimal startingPrice, string sellerId)
     {
         Id = id;
         Title = title;
+        Description = description;
         StartingPrice = startingPrice;
         CurrentPrice = startingPrice;
         Status = ItemStatus.New;
         EndsAt = DateTimeOffset.UtcNow.Add(AuctionDuration);
+        SellerId = sellerId;
     }
 
     public void MarkInProcess() => Status = ItemStatus.InProcess;

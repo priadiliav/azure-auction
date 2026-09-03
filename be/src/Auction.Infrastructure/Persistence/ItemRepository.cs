@@ -28,4 +28,10 @@ public class ItemRepository(AuctionDbContext dbContext) : IItemRepository
         => await dbContext.Items
             .Where(item => item.Status != ItemStatus.Ended && item.EndsAt <= now)
             .ToListAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<Item>> GetBySellerIdAsync(string sellerId, CancellationToken cancellationToken)
+        => await dbContext.Items
+            .Where(item => item.SellerId == sellerId)
+            .OrderByDescending(item => item.Id)
+            .ToListAsync(cancellationToken);
 }

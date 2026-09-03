@@ -69,15 +69,7 @@ export function ItemCard({ item }: ItemCardProps) {
         </CardContent>
       </Card>
 
-      {canBid && (
-        <BidDialog
-          open={bidOpen}
-          onClose={() => setBidOpen(false)}
-          itemId={item.itemId}
-          itemTitle={item.title}
-          currentPrice={item.currentPrice}
-        />
-      )}
+      {canBid && <BidDialog open={bidOpen} onClose={() => setBidOpen(false)} item={item} />}
     </>
   )
 }

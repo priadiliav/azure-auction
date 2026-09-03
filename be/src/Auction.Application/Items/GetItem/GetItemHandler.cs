@@ -2,21 +2,20 @@ using MediatR;
 
 namespace Auction.Application.Items.GetItem;
 
-public class GetItemHandler(IItemRepository itemRepository) : IRequestHandler<GetItemQuery, GetItemResult?>
+public class GetItemHandler(IItemRepository itemRepository, IBidRepository bidRepository)
+    : IRequestHandler<GetItemQuery, GetItemResult?>
 {
+    private const int RecentBidCount = 3;
+
     public async Task<GetItemResult?> Handle(GetItemQuery request, CancellationToken cancellationToken)
     {
         var item = await itemRepository.GetByIdAsync(request.ItemId, cancellationToken);
+        if (item is null)
+        {
+            return null;
+        }
 
-        return item is null
-            ? null
-            : new GetItemResult(
-                item.Id,
-                item.Title,
-                item.StartingPrice,
-                item.CurrentPrice,
-                item.Status.ToString(),
-                item.BlobUrl,
-                item.EndsAt);
+        var recentBids = await bidRepository.GetRecentBidsAsync(item.Id, RecentBidCount, cancellationToken);
+        return GetItemResult.FromItem(item, recentBids);
     }
 }

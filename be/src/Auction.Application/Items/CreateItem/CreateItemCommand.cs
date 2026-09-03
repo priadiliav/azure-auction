@@ -3,5 +3,7 @@ using MediatR;
 namespace Auction.Application.Items.CreateItem;
 
 public record CreateItemCommand(
-    string Title, 
-    decimal StartingPrice) : IRequest<Guid>;
+    string Title,
+    string Description,
+    decimal StartingPrice,
+    string SellerId) : IRequest<Guid>;

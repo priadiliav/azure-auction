@@ -16,8 +16,8 @@ public class SignalRBidNotifierQueueTrigger(
         BidPlacedMessage message)
     {
         logger.LogInformation(
-            "Notifying clients: item {ItemId} new bid {Amount} by {BidderName}",
-            message.ItemId, message.Amount, message.BidderName);
+            "Notifying clients: item {ItemId} new bid {Amount} by {BidderName} ({BidderId})",
+            message.ItemId, message.Amount, message.BidderName, message.BidderId);
         return new SignalRMessageAction("bidPlaced")
         {
             Arguments = [message],

@@ -3,4 +3,4 @@ using MediatR;
 
 namespace Auction.Application.Items.GetItems;
 
-public record GetItemsQuery : IRequest<IReadOnlyList<GetItemResult>>;
+public record GetItemsQuery(string? SellerId = null) : IRequest<IReadOnlyList<GetItemResult>>;

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -32,4 +33,23 @@ public static class GoogleTokenValidation
             IssuerSigningKeys = config.SigningKeys,
         };
     }
+
+    /// <summary>
+    /// Pulls the Google profile fields we care about off a validated token's claims.
+    /// </summary>
+    public static (string Id, string Email, string Name, string AvatarUrl) ExtractUserProfile(ClaimsPrincipal principal)
+    {
+        var id = FindClaim(principal, "sub", ClaimTypes.NameIdentifier)
+            ?? throw new InvalidOperationException("Token is missing a 'sub' claim.");
+        var email = FindClaim(principal, "email", ClaimTypes.Email) ?? string.Empty;
+        var name = FindClaim(principal, "name") ?? string.Empty;
+        var avatarUrl = FindClaim(principal, "picture") ?? string.Empty;
+
+        return (id, email, name, avatarUrl);
+    }
+
+    private static string? FindClaim(ClaimsPrincipal principal, params string[] claimTypes)
+        => claimTypes
+            .Select(claimType => principal.FindFirst(claimType)?.Value)
+            .FirstOrDefault(value => value is not null);
 }

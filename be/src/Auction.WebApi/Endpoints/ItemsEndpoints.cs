@@ -11,9 +11,11 @@ public static class ItemsEndpoints
 {
     public static void MapItemsEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/items", async (CreateItemCommand command, IMediator mediator) =>
+        app.MapPost("/api/items", async (CreateItemRequest request, ClaimsPrincipal user, IMediator mediator) =>
         {
-            var itemId = await mediator.Send(command);
+            var sellerId = user.FindFirstValue("sub") ?? user.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var itemId = await mediator.Send(
+                new CreateItemCommand(request.Title, request.Description, request.StartingPrice, sellerId));
             return Results.Ok(new { itemId });
         }).RequireAuthorization();
 
@@ -22,6 +24,13 @@ public static class ItemsEndpoints
             var results = await mediator.Send(new GetItemsQuery());
             return Results.Ok(results);
         });
+
+        app.MapGet("/api/items/mine", async (ClaimsPrincipal user, IMediator mediator) =>
+        {
+            var sellerId = user.FindFirstValue("sub") ?? user.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var results = await mediator.Send(new GetItemsQuery(sellerId));
+            return Results.Ok(results);
+        }).RequireAuthorization();
 
         app.MapGet("/api/items/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -33,8 +42,8 @@ public static class ItemsEndpoints
 
         app.MapPost("/api/items/{id:guid}/bids", async (Guid id, PlaceBidRequest request, ClaimsPrincipal user, IMediator mediator) =>
         {
-            var bidderName = user.FindFirstValue("name") ?? user.FindFirstValue(ClaimTypes.Email) ?? "Unknown";
-            var result = await mediator.Send(new PlaceBidCommand(id, request.Amount, bidderName));
+            var bidderId = user.FindFirstValue("sub") ?? user.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var result = await mediator.Send(new PlaceBidCommand(id, request.Amount, bidderId));
 
             return result.Reason switch
             {
@@ -46,5 +55,7 @@ public static class ItemsEndpoints
         }).RequireAuthorization();
     }
 }
+
+public record CreateItemRequest(string Title, string Description, decimal StartingPrice);
 
 public record PlaceBidRequest(decimal Amount);
