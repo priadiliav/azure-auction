@@ -9,8 +9,17 @@ public class GetItemsHandler(IItemRepository itemRepository) : IRequestHandler<G
     {
         var items = await itemRepository.GetAllAsync(cancellationToken);
     
+        // todo: here we will do filtering, sorting, and pagination in the future + recomendations
+        
         return items
-            .Select(item => new GetItemResult(item.Id, item.Title, item.StartingPrice, item.Status.ToString(), item.BlobUrl))
+            .Select(item => new GetItemResult(
+                item.Id, 
+                item.Title, 
+                item.StartingPrice, 
+                item.CurrentPrice, 
+                item.Status.ToString(), 
+                item.BlobUrl, 
+                item.EndsAt))
             .ToList();
     }
 }

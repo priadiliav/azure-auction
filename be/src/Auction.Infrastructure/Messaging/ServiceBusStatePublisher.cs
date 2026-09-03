@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Auction.Application.Items;
-using Auction.Contracts;
 using Azure.Messaging.ServiceBus;
 
 namespace Auction.Infrastructure.Messaging;

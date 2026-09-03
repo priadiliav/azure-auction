@@ -1,6 +1,6 @@
-using Auction.Contracts;
-
 namespace Auction.Application.Items;
+
+public record ItemStateChangedMessage(Guid ItemId, string Status);
 
 public interface IStatePublisher
 {

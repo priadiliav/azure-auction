@@ -23,4 +23,9 @@ public interface IItemRepository
     /// Persists changes made to an existing item.
     /// </summary>
     Task UpdateAsync(Item item, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Retrieves items whose auction end time has passed but that haven't been closed yet.
+    /// </summary>
+    Task<IReadOnlyList<Item>> GetExpiredActiveAsync(DateTimeOffset now, CancellationToken cancellationToken);
 }

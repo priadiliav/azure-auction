@@ -11,10 +11,12 @@ public class GetItemHandler(IItemRepository itemRepository) : IRequestHandler<Ge
         return item is null
             ? null
             : new GetItemResult(
-                item.Id, 
-                item.Title, 
-                item.StartingPrice, 
+                item.Id,
+                item.Title,
+                item.StartingPrice,
+                item.CurrentPrice,
                 item.Status.ToString(),
-                item.BlobUrl);
+                item.BlobUrl,
+                item.EndsAt);
     }
 }

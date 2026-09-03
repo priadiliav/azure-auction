@@ -4,11 +4,11 @@ using Azure.Messaging.ServiceBus;
 
 namespace Auction.Infrastructure.Messaging;
 
-public class ServiceBusItemPublisher(ServiceBusClient client) : IItemPublisher
+public class ServiceBusBidPublisher(ServiceBusClient client) : IBidPublisher
 {
-    private readonly ServiceBusSender _sender = client.CreateSender("items");
+    private readonly ServiceBusSender _sender = client.CreateSender("bids");
 
-    public async Task PublishAsync(ItemCreatedMessage message, CancellationToken cancellationToken)
+    public async Task PublishAsync(BidPlacedMessage message, CancellationToken cancellationToken)
     {
         var body = JsonSerializer.Serialize(message);
         await _sender.SendMessageAsync(new ServiceBusMessage(body), cancellationToken);

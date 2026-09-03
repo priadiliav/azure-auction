@@ -24,12 +24,15 @@ public class BlobSasHttpTrigger(
 
     [Function(nameof(BlobSasHttpTrigger))]
     public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "items/{itemId:guid}/blob-sas")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, 
+            "post", 
+            Route = "items/{itemId:guid}/blob-sas")]
         HttpRequestData req,
         Guid itemId,
         CancellationToken cancellationToken)
     {
         var query = QueryHelpers.ParseQuery(req.Url.Query);
+        
         var fileName = query.TryGetValue("fileName", out var fileNameValue) ? fileNameValue.ToString() : null;
         var contentType = query.TryGetValue("contentType", out var contentTypeValue) ? contentTypeValue.ToString() : null;
 

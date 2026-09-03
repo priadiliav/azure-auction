@@ -243,7 +243,7 @@ module functionApp 'modules/containerApp.bicep' = {
   }
 }
 
-module itemBlobCreatedSubscription 'modules/blobEventGridSubscription.bicep' = {
+module itemBlobCreatedSubscription 'modules/eventGridSubscriptions.bicep' = {
   name: 'itemBlobCreatedSubscription'
   params: {
     storageAccountName: itemBlobStorageAccount.outputs.name

@@ -25,7 +25,7 @@ resource blobCreatedSubscription 'Microsoft.EventGrid/eventSubscriptions@2022-06
     destination: {
       endpointType: 'WebHook'
       properties: {
-        endpointUrl: '${functionAppBaseUrl}/runtime/webhooks/blobs?functionName=Host.Functions.${functionName}&code=${blobsExtensionSystemKey}'
+        endpointUrl: '${functionAppBaseUrl}/runtime/webhooks/blobs?functionName=${functionName}&code=${blobsExtensionSystemKey}'
       }
     }
     eventDeliverySchema: 'EventGridSchema'

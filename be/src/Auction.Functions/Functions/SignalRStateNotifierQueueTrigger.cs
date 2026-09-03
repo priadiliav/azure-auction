@@ -1,6 +1,6 @@
+using Auction.Application.Items;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using Auction.Contracts;
 
 namespace Auction.Functions.Functions;
 

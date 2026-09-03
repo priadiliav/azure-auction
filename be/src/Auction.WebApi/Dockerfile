@@ -9,7 +9,6 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/Auction.WebApi/Auction.WebApi.csproj", "src/Auction.WebApi/"]
 COPY ["src/Auction.Application/Auction.Application.csproj", "src/Auction.Application/"]
-COPY ["src/Auction.Contracts/Auction.Contracts.csproj", "src/Auction.Contracts/"]
 COPY ["src/Auction.Domain/Auction.Domain.csproj", "src/Auction.Domain/"]
 COPY ["src/Auction.Infrastructure/Auction.Infrastructure.csproj", "src/Auction.Infrastructure/"]
 RUN dotnet restore "src/Auction.WebApi/Auction.WebApi.csproj"

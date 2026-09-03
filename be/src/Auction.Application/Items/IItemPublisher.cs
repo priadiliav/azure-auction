@@ -1,6 +1,6 @@
-using Auction.Contracts;
-
 namespace Auction.Application.Items;
+
+public record ItemCreatedMessage(Guid ItemId);
 
 public interface IItemPublisher
 {

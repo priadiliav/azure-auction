@@ -7,4 +7,5 @@ public enum ItemStatus
     Analysis,
     Failed,
     Listed,
+    Ended,
 }

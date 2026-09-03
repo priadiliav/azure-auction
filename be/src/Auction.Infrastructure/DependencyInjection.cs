@@ -22,6 +22,7 @@ public static class DependencyInjection
         services.AddSingleton(new ServiceBusClient(serviceBusNamespace, new DefaultAzureCredential()));
         services.AddSingleton<IItemPublisher, ServiceBusItemPublisher>();
         services.AddSingleton<IStatePublisher, ServiceBusStatePublisher>();
+        services.AddSingleton<IBidPublisher, ServiceBusBidPublisher>();
 
         var blobStorageAccountName = configuration["BlobStorage:AccountName"]
             ?? throw new InvalidOperationException("Missing configuration: BlobStorage:AccountName");
@@ -36,5 +37,6 @@ public static class DependencyInjection
 
         services.AddDbContext<AuctionDbContext>(options => options.UseSqlServer(connectionString));
         services.AddScoped<IItemRepository, ItemRepository>();
+        services.AddScoped<IBidPlacementService, BidPlacementService>();
     }
 }

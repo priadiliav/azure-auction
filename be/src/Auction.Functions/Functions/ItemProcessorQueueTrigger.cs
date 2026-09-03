@@ -1,5 +1,4 @@
 using Auction.Application.Items;
-using Auction.Contracts;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 

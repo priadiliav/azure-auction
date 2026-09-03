@@ -23,4 +23,9 @@ public class ItemRepository(AuctionDbContext dbContext) : IItemRepository
         dbContext.Items.Update(item);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<Item>> GetExpiredActiveAsync(DateTimeOffset now, CancellationToken cancellationToken)
+        => await dbContext.Items
+            .Where(item => item.Status != ItemStatus.Ended && item.EndsAt <= now)
+            .ToListAsync(cancellationToken);
 }
