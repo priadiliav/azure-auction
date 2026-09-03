@@ -1,5 +1,5 @@
 import { Box, Card, CardContent, Chip, Stack, Typography } from '@mui/material'
-import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
+import HourglassEmptyOutlinedIcon from '@mui/icons-material/HourglassEmptyOutlined'
 import type { Item } from '../api'
 
 type ItemCardProps = {
@@ -7,8 +7,10 @@ type ItemCardProps = {
 }
 
 export function ItemCard({ item }: ItemCardProps) {
+  const isQueued = !item.blobUrl
+
   return (
-    <Card variant="outlined">
+    <Card variant="outlined" sx={{ opacity: isQueued ? 0.6 : 1 }}>
       <Box
         sx={{
           aspectRatio: '1 / 1',
@@ -21,7 +23,7 @@ export function ItemCard({ item }: ItemCardProps) {
           backgroundPosition: 'center',
         }}
       >
-        {!item.blobUrl && <ImageOutlinedIcon sx={{ fontSize: 48, color: 'grey.400' }} />}
+        {isQueued && <HourglassEmptyOutlinedIcon sx={{ fontSize: 48, color: 'grey.400' }} />}
       </Box>
       <CardContent>
         <Typography variant="subtitle1" noWrap title={item.title}>
@@ -29,7 +31,12 @@ export function ItemCard({ item }: ItemCardProps) {
         </Typography>
         <Stack direction="row" sx={{ mt: 1, justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6">${item.startingPrice}</Typography>
-          <Chip label={item.status} size="small" />
+          <Chip
+            label={isQueued ? 'Queued to publish' : item.status}
+            size="small"
+            color={isQueued ? 'default' : 'primary'}
+            icon={isQueued ? <HourglassEmptyOutlinedIcon /> : undefined}
+          />
         </Stack>
       </CardContent>
     </Card>

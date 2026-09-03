@@ -119,8 +119,12 @@ module itemBlobStorageAccount 'modules/storageAccount.bicep' = {
   params: {
     name: itemBlobStorageAccountName
     location: location
-    containerNames: [
-      'items'
+    allowBlobPublicAccess: true
+    containers: [
+      {
+        name: 'items'
+        publicAccess: 'Blob'
+      }
     ]
     corsAllowedOrigins: [
       'https://${staticSites.outputs.defaultHostname}'
