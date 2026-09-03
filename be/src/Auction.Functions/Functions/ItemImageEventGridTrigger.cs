@@ -6,14 +6,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Auction.Functions.Functions;
 
-public class ItemImageBlobTrigger(
+public class ItemImageEventGridTrigger(
     IItemRepository itemRepository,
     IItemPublisher itemPublisher,
-    ILogger<ItemImageBlobTrigger> logger)
+    ILogger<ItemImageEventGridTrigger> logger)
 {
-    [Function(nameof(ItemImageBlobTrigger))]
+    [Function(nameof(ItemImageEventGridTrigger))]
     public async Task Run(
-        [BlobTrigger("items/{itemId}/{fileName}", Connection = "BlobStorage")] BlobClient blobClient,
+        [BlobTrigger("items/{itemId}/{fileName}", Source = BlobTriggerSource.EventGrid, Connection = "BlobStorage")] BlobClient blobClient,
         Guid itemId,
         string fileName,
         CancellationToken cancellationToken)

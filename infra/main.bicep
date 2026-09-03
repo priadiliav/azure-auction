@@ -61,6 +61,10 @@ param signalRName string = 'auction-signalr'
 @description('Name of the storage account backing item image uploads.')
 param itemBlobStorageAccountName string = 'auctionitemsblob'
 
+@description('The Function App\'s "blobs_extension" system key, needed to authenticate Event Grid\'s webhook call to the item-image blob trigger. Fetch it yourself (e.g. from the azure-webjobs-secrets storage container) and pass it at deploy time - never committed or logged.')
+@secure()
+param blobsExtensionSystemKey string
+
 module containerRegistry 'modules/containerRegistry.bicep' = {
   name: 'containerRegistry'
   params: {
@@ -236,6 +240,17 @@ module functionApp 'modules/containerApp.bicep' = {
         value: 'managedIdentity'
       }
     ]
+  }
+}
+
+module itemBlobCreatedSubscription 'modules/blobEventGridSubscription.bicep' = {
+  name: 'itemBlobCreatedSubscription'
+  params: {
+    storageAccountName: itemBlobStorageAccount.outputs.name
+    containerName: 'items'
+    functionAppBaseUrl: 'https://${functionApp.outputs.fqdn}'
+    functionName: 'ItemImageEventGridTrigger'
+    blobsExtensionSystemKey: blobsExtensionSystemKey
   }
 }
 
