@@ -1,13 +1,15 @@
 using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Auction.Functions.Functions;
 
-public class NegotiateFunction
+public class SignalRNegotiateHttpTrigger(
+    ILogger<SignalRNegotiateHttpTrigger> logger)
 {
-    [Function(nameof(NegotiateFunction))]
-    public static async Task<HttpResponseData> Run(
+    [Function(nameof(SignalRNegotiateHttpTrigger))]
+    public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "negotiate")]
         HttpRequestData req,
         [SignalRConnectionInfoInput(
@@ -18,6 +20,7 @@ public class NegotiateFunction
         var response = req.CreateResponse(HttpStatusCode.OK);
         response.Headers.Add("Content-Type", "application/json; charset=utf-8");
         await response.WriteStringAsync(connectionInfo);
+        logger.LogInformation("SignalR negotiation request processed successfully.");
         return response;
     }
 }

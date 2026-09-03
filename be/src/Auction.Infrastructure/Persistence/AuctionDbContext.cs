@@ -19,6 +19,8 @@ public class AuctionDbContext(DbContextOptions<AuctionDbContext> options) : DbCo
             builder.Property(item => item.Status)
                 .HasConversion<string>()
                 .HasMaxLength(20);
+            builder.Property(item => item.BlobUrl)
+                .HasMaxLength(1000);
         });
     }
 }

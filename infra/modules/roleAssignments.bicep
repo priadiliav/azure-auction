@@ -25,6 +25,12 @@ param signalRName string
 @description('Principal (object) ID of the identity that should send messages via the SignalR Service (e.g. the Function App notifier).')
 param signalRPrincipalId string
 
+@description('Name of an existing Storage Account backing item image uploads.')
+param itemBlobStorageAccountName string
+
+@description('Principal (object) ID of the identity that should read/write item image blobs and mint upload SAS tokens (e.g. the Function App).')
+param itemBlobPrincipalId string
+
 resource containerRegistry 'Microsoft.ContainerRegistry/registries@2026-01-01-preview' existing = {
   name: containerRegistryName
 }
@@ -104,3 +110,23 @@ resource signalRRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-
     principalType: 'ServicePrincipal'
   }
 }
+
+resource itemBlobStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
+  name: itemBlobStorageAccountName
+}
+
+var itemBlobRoleDefinitionIds = [
+  'b7e6dc6d-f1e8-4753-8033-0f276bb0955b' // Storage Blob Data Owner
+  '974c5e8b-45b9-4653-ba55-5f855dd0fb88' // Storage Queue Data Contributor (blob trigger's internal polling receipts)
+  'db58b8e5-c6ad-4a2a-8342-4190687cbf4a' // Storage Blob Delegator (mint user-delegation SAS tokens)
+]
+
+resource itemBlobRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for roleDefinitionId in itemBlobRoleDefinitionIds: {
+  name: guid(itemBlobStorageAccount.id, itemBlobPrincipalId, roleDefinitionId)
+  scope: itemBlobStorageAccount
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleDefinitionId)
+    principalId: itemBlobPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}]

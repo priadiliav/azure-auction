@@ -1,13 +1,13 @@
-using Auction.Contracts;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.SignalRService;
 using Microsoft.Extensions.Logging;
+using Auction.Contracts;
 
 namespace Auction.Functions.Functions;
 
-public class StateChangedNotifierQueueTrigger(ILogger<StateChangedNotifierQueueTrigger> logger)
+public class SignalRStateNotifierQueueTrigger(
+    ILogger<SignalRStateNotifierQueueTrigger> logger)
 {
-    [Function(nameof(StateChangedNotifierQueueTrigger))]
+    [Function(nameof(SignalRStateNotifierQueueTrigger))]
     [SignalROutput(HubName = "items")]
     public SignalRMessageAction Run(
         [ServiceBusTrigger(

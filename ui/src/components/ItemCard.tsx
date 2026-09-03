@@ -16,9 +16,12 @@ export function ItemCard({ item }: ItemCardProps) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          backgroundImage: item.blobUrl ? `url(${item.blobUrl})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
         }}
       >
-        <ImageOutlinedIcon sx={{ fontSize: 48, color: 'grey.400' }} />
+        {!item.blobUrl && <ImageOutlinedIcon sx={{ fontSize: 48, color: 'grey.400' }} />}
       </Box>
       <CardContent>
         <Typography variant="subtitle1" noWrap title={item.title}>

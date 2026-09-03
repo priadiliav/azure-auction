@@ -58,6 +58,9 @@ param sqlAadAdminLogin string
 @description('Name of the Azure SignalR Service resource.')
 param signalRName string = 'auction-signalr'
 
+@description('Name of the storage account backing item image uploads.')
+param itemBlobStorageAccountName string = 'auctionitemsblob'
+
 module containerRegistry 'modules/containerRegistry.bicep' = {
   name: 'containerRegistry'
   params: {
@@ -111,6 +114,20 @@ module signalR 'modules/signalR.bicep' = {
   }
 }
 
+module itemBlobStorageAccount 'modules/storageAccount.bicep' = {
+  name: 'itemBlobStorageAccount'
+  params: {
+    name: itemBlobStorageAccountName
+    location: location
+    containerNames: [
+      'items'
+    ]
+    corsAllowedOrigins: [
+      'https://${staticSites.outputs.defaultHostname}'
+    ]
+  }
+}
+
 module staticSites 'modules/staticWebApp.bicep' = {
   name: 'staticSites'
   params: {
@@ -143,6 +160,10 @@ module containerApp 'modules/containerApp.bicep' = {
       {
         name: 'ServiceBus__FullyQualifiedNamespace'
         value: serviceBus.outputs.fullyQualifiedNamespace
+      }
+      {
+        name: 'BlobStorage__AccountName'
+        value: itemBlobStorageAccount.outputs.name
       }
       {
         name: 'ConnectionStrings__AuctionDb'
@@ -195,6 +216,10 @@ module functionApp 'modules/containerApp.bicep' = {
         value: serviceBus.outputs.fullyQualifiedNamespace
       }
       {
+        name: 'BlobStorage__AccountName'
+        value: itemBlobStorageAccount.outputs.name
+      }
+      {
         name: 'ConnectionStrings__AuctionDb'
         value: 'Server=tcp:${sqlDatabase.outputs.serverFqdn},1433;Database=${sqlDatabase.outputs.databaseName};Authentication=Active Directory Default;Encrypt=True;TrustServerCertificate=False;'
       }
@@ -222,5 +247,7 @@ module roleAssignments 'modules/roleAssignments.bicep' = {
     serviceBusProcessorPrincipalId: functionApp.outputs.principalId
     signalRName: signalR.outputs.name
     signalRPrincipalId: functionApp.outputs.principalId
+    itemBlobStorageAccountName: itemBlobStorageAccount.outputs.name
+    itemBlobPrincipalId: functionApp.outputs.principalId
   }
 }

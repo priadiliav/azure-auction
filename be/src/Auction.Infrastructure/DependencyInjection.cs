@@ -2,8 +2,10 @@ using Auction.Application.Items;
 using Auction.Application.Items.CreateItem;
 using Auction.Infrastructure.Messaging;
 using Auction.Infrastructure.Persistence;
+using Auction.Infrastructure.Storage;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
+using Azure.Storage.Blobs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +22,14 @@ public static class DependencyInjection
         services.AddSingleton(new ServiceBusClient(serviceBusNamespace, new DefaultAzureCredential()));
         services.AddSingleton<IItemPublisher, ServiceBusItemPublisher>();
         services.AddSingleton<IStatePublisher, ServiceBusStatePublisher>();
+
+        var blobStorageAccountName = configuration["BlobStorage:AccountName"]
+            ?? throw new InvalidOperationException("Missing configuration: BlobStorage:AccountName");
+
+        services.AddSingleton(new BlobServiceClient(
+            new Uri($"https://{blobStorageAccountName}.blob.core.windows.net"),
+            new DefaultAzureCredential()));
+        services.AddSingleton<IBlobSasService, BlobSasService>();
 
         var connectionString = configuration.GetConnectionString("AuctionDb")
             ?? throw new InvalidOperationException("Missing configuration: ConnectionStrings:AuctionDb");
