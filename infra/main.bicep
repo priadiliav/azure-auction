@@ -68,6 +68,9 @@ param blobsExtensionSystemKey string
 @description('Google OAuth 2.0 Client ID used to validate Google Sign-In ID tokens. Not a secret - it is also embedded in the frontend.')
 param googleClientId string
 
+@description('Name of the Azure OpenAI resource backing item embeddings/recommendations.')
+param openAiName string = 'auction-openai'
+
 module containerRegistry 'modules/containerRegistry.bicep' = {
   name: 'containerRegistry'
   params: {
@@ -117,6 +120,14 @@ module signalR 'modules/signalR.bicep' = {
   name: 'signalR'
   params: {
     name: signalRName
+    location: location
+  }
+}
+
+module openAi 'modules/openAi.bicep' = {
+  name: 'openAi'
+  params: {
+    name: openAiName
     location: location
   }
 }
@@ -184,6 +195,14 @@ module containerApp 'modules/containerApp.bicep' = {
         name: 'Authentication__Google__ClientId'
         value: googleClientId
       }
+      {
+        name: 'AzureOpenAI__Endpoint'
+        value: openAi.outputs.endpoint
+      }
+      {
+        name: 'AzureOpenAI__EmbeddingDeploymentName'
+        value: openAi.outputs.embeddingDeploymentName
+      }
     ]
   }
 }
@@ -250,6 +269,14 @@ module functionApp 'modules/containerApp.bicep' = {
         name: 'Authentication__Google__ClientId'
         value: googleClientId
       }
+      {
+        name: 'AzureOpenAI__Endpoint'
+        value: openAi.outputs.endpoint
+      }
+      {
+        name: 'AzureOpenAI__EmbeddingDeploymentName'
+        value: openAi.outputs.embeddingDeploymentName
+      }
     ]
   }
 }
@@ -279,5 +306,7 @@ module roleAssignments 'modules/roleAssignments.bicep' = {
     signalRPrincipalId: functionApp.outputs.principalId
     itemBlobStorageAccountName: itemBlobStorageAccount.outputs.name
     itemBlobPrincipalId: functionApp.outputs.principalId
+    openAiName: openAi.outputs.name
+    openAiPrincipalId: functionApp.outputs.principalId
   }
 }

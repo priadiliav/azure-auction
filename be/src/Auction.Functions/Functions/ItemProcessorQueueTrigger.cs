@@ -7,6 +7,7 @@ namespace Auction.Functions.Functions;
 public class ItemProcessorQueueTrigger(
     IItemRepository itemRepository,
     IStatePublisher statePublisher,
+    IEmbeddingService embeddingService,
     ILogger<ItemProcessorQueueTrigger> logger)
 {
     private static readonly TimeSpan StepDelay = TimeSpan.FromSeconds(5);
@@ -32,6 +33,8 @@ public class ItemProcessorQueueTrigger(
         await Task.Delay(StepDelay, cancellationToken);
 
         item.MarkAnalysis();
+        var embedding = await embeddingService.GetEmbeddingAsync($"{item.Title}\n{item.Description}", cancellationToken);
+        item.SetEmbedding(EmbeddingVector.Serialize(embedding));
         await itemRepository.UpdateAsync(item, cancellationToken);
         await statePublisher.PublishAsync(new ItemStateChangedMessage(item.Id, item.Status.ToString()), cancellationToken);
         await Task.Delay(StepDelay, cancellationToken);

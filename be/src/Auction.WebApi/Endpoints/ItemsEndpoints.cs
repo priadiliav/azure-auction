@@ -19,9 +19,12 @@ public static class ItemsEndpoints
             return Results.Ok(new { itemId });
         }).RequireAuthorization();
 
-        app.MapGet("/api/items", async (IMediator mediator) =>
+        app.MapGet("/api/items", async (ClaimsPrincipal user, IMediator mediator) =>
         {
-            var results = await mediator.Send(new GetItemsQuery());
+            var requestingUserId = user.Identity?.IsAuthenticated == true
+                ? user.FindFirstValue("sub") ?? user.FindFirstValue(ClaimTypes.NameIdentifier)
+                : null;
+            var results = await mediator.Send(new GetItemsQuery(RequestingUserId: requestingUserId));
             return Results.Ok(results);
         });
 

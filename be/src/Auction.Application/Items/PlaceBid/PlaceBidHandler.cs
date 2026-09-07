@@ -1,4 +1,5 @@
 using Auction.Application.Users;
+using Auction.Domain.Interactions;
 using MediatR;
 
 namespace Auction.Application.Items.PlaceBid;
@@ -6,6 +7,7 @@ namespace Auction.Application.Items.PlaceBid;
 public class PlaceBidHandler(
     IBidPlacementService bidPlacementService,
     IBidPublisher bidPublisher,
+    IInteractionPublisher interactionPublisher,
     IUserRepository userRepository)
     : IRequestHandler<PlaceBidCommand, PlaceBidResult>
 {
@@ -21,6 +23,10 @@ public class PlaceBidHandler(
                 new BidPlacedMessage(
                     request.ItemId, request.Amount, request.BidderId,
                     bidder?.Name ?? "Unknown", bidder?.AvatarUrl ?? string.Empty),
+                cancellationToken);
+
+            await interactionPublisher.PublishAsync(
+                new InteractionRecordedMessage(request.BidderId, request.ItemId, nameof(InteractionType.Bid)),
                 cancellationToken);
         }
 

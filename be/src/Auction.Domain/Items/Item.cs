@@ -13,6 +13,7 @@ public class Item
     public string? BlobUrl { get; private set; }
     public DateTimeOffset EndsAt { get; private set; }
     public string SellerId { get; private set; } = string.Empty;
+    public string? Embedding { get; private set; }
     public byte[] RowVersion { get; private set; } = [];
 
     private Item()
@@ -37,6 +38,8 @@ public class Item
     public void MarkFailed() => Status = ItemStatus.Failed;
 
     public void SetBlobUrl(string blobUrl) => BlobUrl = blobUrl;
+
+    public void SetEmbedding(string embeddingJson) => Embedding = embeddingJson;
 
     public void PlaceBid(decimal amount) => CurrentPrice = amount;
 

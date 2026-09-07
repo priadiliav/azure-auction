@@ -31,6 +31,12 @@ param itemBlobStorageAccountName string
 @description('Principal (object) ID of the identity that should read/write item image blobs and mint upload SAS tokens (e.g. the Function App).')
 param itemBlobPrincipalId string
 
+@description('Name of an existing Azure OpenAI resource to grant access on.')
+param openAiName string
+
+@description('Principal (object) ID of the identity that should call the embeddings API (e.g. the Function App).')
+param openAiPrincipalId string
+
 resource containerRegistry 'Microsoft.ContainerRegistry/registries@2026-01-01-preview' existing = {
   name: containerRegistryName
 }
@@ -130,3 +136,17 @@ resource itemBlobRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-0
     principalType: 'ServicePrincipal'
   }
 }]
+
+resource openAi 'Microsoft.CognitiveServices/accounts@2025-06-01' existing = {
+  name: openAiName
+}
+
+resource openAiRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(openAi.id, openAiPrincipalId, 'CognitiveServicesOpenAIUser')
+  scope: openAi
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
+    principalId: openAiPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
