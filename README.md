@@ -1,3 +1,5 @@
+<img width="1267" height="706" alt="image" src="https://github.com/user-attachments/assets/3d381911-be23-4af2-9e13-fd713889c163" />
+
 ### Used Services
 - Azure Container Registry - stores container images for the API and Function App
 - Azure Container Apps Environment - hosts both Container Apps
