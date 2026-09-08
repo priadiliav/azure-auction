@@ -19,6 +19,7 @@ public class BlobSasHttpTrigger(
         "image/png",
         "image/webp",
     };
+    
 
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
