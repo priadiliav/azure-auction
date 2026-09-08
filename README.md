@@ -1,5 +1,17 @@
 <img width="1073" height="540" alt="image" src="https://github.com/user-attachments/assets/1bc7f1c4-570f-480b-8cf3-fbf21517973d" />
 
+### About this project
+
+A full-stack online auction platform, built as a learning/portfolio project to go deep on a real, event-driven Azure architecture rather than just another CRUD app. It's aimed at:
+
+- Real-time bidding - live price updates, recent-bidder lists, and auction-close notifications pushed to every connected client via SignalR, no polling.
+- Event-driven processing - item creation, image upload, and bid placement are decoupled from their downstream effects (status pipeline, notifications, interaction logging) through Service Bus and Event Grid instead of synchronous calls.
+- Content-based recommendations - item title/description are embedded via Azure OpenAI, and a user's bid/win history is used to rank their "all items" feed by semantic similarity to what they've shown interest in.
+- Concurrency-safe bidding - simultaneous bids on the same item are resolved with an optimistic-concurrency check in the database, not a queue or a lock.
+- Secretless auth to Azure - every service-to-service connection (SQL, Storage, Service Bus, SignalR, OpenAI) uses managed identity; no connection strings or keys in config.
+- Real user auth - Google Sign-In, with the backend validating ID tokens directly rather than delegating to a separate auth service.
+
+It's a pet project, not a production auction site - the goal was depth on a handful of real distributed-systems problems (bid concurrency, async pipelines, live push, recommendations) rather than breadth of marketplace features.
 
 ### Used Services
 - Azure Container Registry - stores container images for the API and Function App
