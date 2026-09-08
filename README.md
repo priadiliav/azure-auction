@@ -1,4 +1,5 @@
-<img width="1267" height="706" alt="image" src="https://github.com/user-attachments/assets/3d381911-be23-4af2-9e13-fd713889c163" />
+<img width="1073" height="540" alt="image" src="https://github.com/user-attachments/assets/1bc7f1c4-570f-480b-8cf3-fbf21517973d" />
+
 
 ### Used Services
 - Azure Container Registry - stores container images for the API and Function App
@@ -16,8 +17,7 @@
 - Azure Static Web App - hosts the React/Vite frontend, CI/CD from GitHub
 - Azure Application Insights + Log Analytics Workspace - monitoring/logging across both Container Apps
 
-### HSD
-<img width="1755" height="887" alt="image" src="https://github.com/user-attachments/assets/c380e6b5-b83a-44b7-a9a6-13a35cda5751" />
+<img width="1055" height="597" alt="image" src="https://github.com/user-attachments/assets/726eae73-02c8-49ef-8229-6de5be3b1c0c" />
 
-## UI example
+### UI example
 <img width="1213" height="893" alt="image" src="https://github.com/user-attachments/assets/a2b15431-7370-4a2d-8174-f8087847c398" />
