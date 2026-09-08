@@ -54,7 +54,8 @@ async function handle<T>(res: Response): Promise<T> {
 
 export const fetchHealth = () => fetch(`${baseUrl}/api/health`).then((res) => handle<HealthResponse>(res))
 
-export const fetchItems = () => fetch(`${baseUrl}/api/items`).then((res) => handle<Item[]>(res))
+export const fetchItems = () =>
+  fetch(`${baseUrl}/api/items`, { headers: authHeaders() }).then((res) => handle<Item[]>(res))
 
 export const fetchMyItems = () =>
   fetch(`${baseUrl}/api/items/mine`, { headers: authHeaders() }).then((res) => handle<Item[]>(res))
